@@ -5,45 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comprar Ingresso</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #fff8e1;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #ff9800;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.4rem;
-    }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      padding: 1rem;
-    }
-    label {
-      display: block;
-      margin-top: 1rem;
-    }
-    input, select {
-      width: 100%;
-      padding: 0.6rem;
-      margin-top: 0.3rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    button {
-      margin-top: 1.5rem;
-      width: 100%;
-      padding: 0.9rem;
-      background-color: #ff9800;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-    }
+    body { font-family: Arial, sans-serif; background-color: #fff8e1; margin: 0; padding: 0; }
+    header { background-color: #ff9800; color: white; padding: 1rem; text-align: center; font-size: 1.4rem; }
+    .container { max-width: 600px; margin: auto; padding: 1rem; }
+    label { display: block; margin-top: 1rem; }
+    input, select { width: 100%; padding: 0.6rem; margin-top: 0.3rem; border-radius: 8px; border: 1px solid #ccc; }
+    #total { margin-top: 1rem; font-weight: bold; }
+    button { margin-top: 1.5rem; width: 100%; padding: 0.9rem; background-color: #ff9800; color: white; border: none; border-radius: 10px; font-size: 1rem; }
+    .nomePessoa { margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -57,14 +26,18 @@
     <label for="whats">WhatsApp:</label>
     <input type="text" id="whats" placeholder="Número com DDD">
 
-    <label for="nome">Nome:</label>
-    <input type="text" id="nome" placeholder="Nome completo">
-
-    <label for="genero">Gênero:</label>
-    <select id="genero">
+    <label for="genero">Gênero dos ingressos:</label>
+    <select id="genero" onchange="atualizarTotal()">
       <option value="masculino">Masculino</option>
       <option value="feminino">Feminino</option>
     </select>
+
+    <label for="quantidade">Quantidade:</label>
+    <input type="number" id="quantidade" value="1" min="1" max="10" onchange="atualizarCampos()">
+
+    <div id="nomesPessoas"></div>
+
+    <div id="total">Total: R$ 0,00</div>
 
     <button onclick="gerarPedido()">Continuar para Pagamento</button>
   </div>
@@ -72,32 +45,56 @@
   <script>
     const evento = JSON.parse(localStorage.getItem("eventoSelecionado"));
     const infoDiv = document.getElementById("infoEvento");
+    const totalDiv = document.getElementById("total");
 
     if (evento) {
       infoDiv.innerHTML = `<h2>${evento.nome}</h2><p><strong>Data:</strong> ${evento.data}</p><p><strong>Local:</strong> ${evento.local}</p><p><strong>Valor:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>`;
-    } else {
-      infoDiv.innerHTML = '<p style="color:red">Evento não encontrado.</p>';
+      atualizarCampos();
+    }
+
+    function atualizarCampos() {
+      const container = document.getElementById("nomesPessoas");
+      container.innerHTML = "";
+      const qtd = parseInt(document.getElementById("quantidade").value);
+      const genero = document.getElementById("genero").value;
+      const preco = genero === "masculino" ? evento.masculino : evento.feminino;
+      totalDiv.textContent = "Total: R$ " + (preco * qtd).toFixed(2).replace(".", ",");
+
+      for (let i = 1; i <= qtd; i++) {
+        const label = document.createElement("label");
+        label.textContent = "Nome da pessoa " + i;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "nomePessoa";
+        input.placeholder = "Nome da pessoa " + i;
+        input.required = true;
+        container.appendChild(label);
+        container.appendChild(input);
+      }
     }
 
     function gerarPedido() {
-      const nome = document.getElementById("nome").value;
       const cpf = document.getElementById("cpf").value;
       const whats = document.getElementById("whats").value;
       const genero = document.getElementById("genero").value;
-      const valor = genero === "masculino" ? evento.masculino : evento.feminino;
-      const pedido = Math.floor(100000 + Math.random() * 900000);
+      const quantidade = parseInt(document.getElementById("quantidade").value);
+      const nomeInputs = document.querySelectorAll(".nomePessoa");
+      const valorUnitario = genero === "masculino" ? evento.masculino : evento.feminino;
+      const ingressos = [];
 
-      const ingresso = {
-        pedido,
-        evento,
-        nome,
-        cpf,
-        whats,
-        genero,
-        valor
-      };
+      nomeInputs.forEach((input, i) => {
+        ingressos.push({
+          nome: input.value,
+          cpf,
+          whats,
+          genero,
+          pedido: Math.floor(100000 + Math.random() * 900000),
+          valor: valorUnitario,
+          evento
+        });
+      });
 
-      localStorage.setItem("ingressoFinal", JSON.stringify(ingresso));
+      localStorage.setItem("ingressosGerados", JSON.stringify(ingressos));
       window.location.href = "pagamento.html";
     }
   </script>
