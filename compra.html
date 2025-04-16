@@ -12,6 +12,7 @@
     #total { margin-top: 1rem; font-weight: bold; }
     .pessoa { margin-bottom: 1rem; background: #fff3e0; padding: 1rem; border-radius: 8px; }
     button { margin-top: 1.5rem; width: 100%; padding: 0.9rem; background-color: #ff9800; color: white; border: none; border-radius: 10px; font-size: 1rem; }
+    .alerta { color: red; font-size: 0.9rem; margin-top: 0.3rem; }
   </style>
 </head>
 <body>
@@ -47,8 +48,8 @@
     const containerPessoas = document.getElementById("pessoasContainer");
     const totalDiv = document.getElementById("total");
 
-    const nomesFemininos = ["maria", "ana", "julia", "larissa", "camila", "carla", "marcela"];
-    const nomesMasculinos = ["joão", "jose", "lucas", "carlos", "rodrigo", "marcos", "bruno"];
+    const nomesFemininos = ["maria", "ana", "julia", "larissa", "camila", "carla", "marcela", "mariana", "beatriz", "fernanda"];
+    const nomesMasculinos = ["joão", "jose", "lucas", "carlos", "rodrigo", "marcos", "bruno", "gabriel", "rafael", "pedro"];
 
     if (evento) {
       containerInfo.innerHTML = `<h2>${evento.nome}</h2><p><strong>Data:</strong> ${evento.data}</p><p><strong>Local:</strong> ${evento.local}</p><p><strong>Valores:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>`;
@@ -64,7 +65,8 @@
         div.className = "pessoa";
         div.innerHTML = `
           <label>Nome da pessoa ${i}</label>
-          <input type="text" class="nomePessoa" placeholder="Nome completo" required>
+          <input type="text" class="nomePessoa" placeholder="Nome completo" oninput="verificarNomeInstantaneo(this, ${i})">
+          <div id="alerta-${i}" class="alerta"></div>
           <label>Gênero:</label>
           <input type="text" value="${genero}" class="generoPessoa" readonly>
         `;
@@ -102,6 +104,17 @@
       return true;
     }
 
+    function verificarNomeInstantaneo(input, index) {
+      const nome = input.value;
+      const genero = document.getElementById("generoPadrao").value;
+      const alerta = document.getElementById("alerta-" + index);
+      if (nome.length > 2 && !verificarNomeGenero(nome, genero)) {
+        alerta.textContent = "Nome parece não combinar com o gênero selecionado.";
+      } else {
+        alerta.textContent = "";
+      }
+    }
+
     function gerarPedido() {
       const cpf = document.getElementById("cpf").value;
       const whats = document.getElementById("whats").value;
@@ -115,11 +128,9 @@
       for (let i = 0; i < nomes.length; i++) {
         const nome = nomes[i].value;
         if (!nome) return alert("Preencha todos os nomes!");
-
         if (!verificarNomeGenero(nome, genero)) {
           return alert(`O nome "${nome}" parece não combinar com o gênero "${genero}". Corrija para continuar.`);
         }
-
         const valor = genero === "masculino" ? evento.masculino : evento.feminino;
         ingressos.push({
           nome,
