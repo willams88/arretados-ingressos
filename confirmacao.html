@@ -4,27 +4,99 @@
   <meta charset="UTF-8" />
   <title>Confirmação</title>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #fffefc;
+    }
+    .ingresso {
+      border: 2px dashed #ff9800;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      border-radius: 12px;
+      background: #fff8e1;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #d84315;
+    }
+    canvas {
+      margin-top: 1rem;
+    }
+    .info strong {
+      color: #333;
+    }
+    .whats {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .whats button {
+      background-color: #25d366;
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
 </head>
-<body style="text-align:center; font-family:sans-serif; padding:2rem;">
-  <h1>✅ Compra Confirmada!</h1>
-  <p><strong>Pedido:</strong> <span id="pedido"></span></p>
-  <p><strong>Nome:</strong> <span id="nome"></span></p>
-  <p><strong>Valor:</strong> R$<span id="valor"></span></p>
-  <canvas id="qr" style="margin-top:20px;"></canvas>
+<body>
+  <h1 style="text-align:center;">✅ Ingressos Gerados</h1>
+  <div id="listaIngressos"></div>
+  <div class="whats">
+    <button onclick="enviarWhats()">Enviar ingressos via WhatsApp</button>
+  </div>
 
   <script>
-    const dados = JSON.parse(localStorage.getItem("ingressoFinal"));
-    if (dados) {
-      document.getElementById("pedido").textContent = dados.pedido;
-      document.getElementById("nome").textContent = dados.nome;
-      document.getElementById("valor").textContent = dados.valor.toFixed(2);
-      new QRious({
-        element: document.getElementById("qr"),
-        value: `Pedido: ${dados.pedido}\nNome: ${dados.nome}\nValor: R$${dados.valor}`,
-        size: 200
-      });
+    const ingressos = JSON.parse(localStorage.getItem("ingressosGerados"));
+    const container = document.getElementById("listaIngressos");
+
+    if (!ingressos || ingressos.length === 0) {
+      container.innerHTML = "<p>Dados não encontrados.</p>";
     } else {
-      document.body.innerHTML = '<p>Dados não encontrados.</p>';
+      ingressos.forEach((ingresso, i) => {
+        const div = document.createElement("div");
+        div.className = "ingresso";
+
+        const canvas = document.createElement("canvas");
+        const qr = new QRious({
+          element: canvas,
+          value: `Pedido: ${ingresso.pedido}\\nNome: ${ingresso.nome}\\nGênero: ${ingresso.genero}\\nCPF: ${ingresso.cpf}`,
+          size: 200
+        });
+
+        div.innerHTML = `
+          <h2>Ingresso #${i + 1}</h2>
+          <p class="info"><strong>Nome:</strong> ${ingresso.nome}</p>
+          <p class="info"><strong>Gênero:</strong> ${ingresso.genero.charAt(0).toUpperCase() + ingresso.genero.slice(1)}</p>
+          <p class="info"><strong>Evento:</strong> ${ingresso.evento.nome}</p>
+          <p class="info"><strong>Pedido:</strong> ${ingresso.pedido}</p>
+          <p class="info"><strong>Valor:</strong> R$ ${ingresso.valor.toFixed(2)}</p>
+        `;
+
+        div.appendChild(canvas);
+        container.appendChild(div);
+      });
+    }
+
+    function enviarWhats() {
+      const numero = "+5543991289991";
+      let texto = "Olá, acabei de gerar os ingressos:%0A";
+      let total = 0;
+
+      ingressos.forEach((ingresso, i) => {
+        texto += `%0AIngresso ${i + 1}:%0ANome: ${ingresso.nome}%0AGênero: ${ingresso.genero}%0APedido: ${ingresso.pedido}%0AValor: R$${ingresso.valor}%0A`;
+        total += ingresso.valor;
+      });
+
+      texto += `%0ATotal: R$${total.toFixed(2)}`;
+      const link = `https://wa.me/${numero}?text=${texto}`;
+      window.open(link, "_blank");
     }
   </script>
 </body>
