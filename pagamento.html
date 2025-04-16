@@ -76,9 +76,8 @@
       const pedido = encodeURIComponent(dados.pedido);
       const valor = encodeURIComponent("R$" + dados.valor);
       const evento = encodeURIComponent(dados.evento.nome);
-      const msg = `Olá, acabei de fazer o pagamento do ingresso!%0A%0ANome: ${nome}%0APedido: ${pedido}%0AEvento: ${evento}%0AValor: ${valor}%0A%0APode validar pra mim?`;
-      const numero = "+5543991289944";
-      window.location.href = `https://wa.me/${numero}?text=${msg}`;
+      const msg = "Olá, acabei de fazer o pagamento do ingresso!%0A%0ANome: " + nome + "%0APedido: " + pedido + "%0AEvento: " + evento + "%0AValor: " + valor + "%0A%0APode validar pra mim?";
+      window.location.href = "https://wa.me/+5543991289991?text=" + msg;
     }
   </script>
 </body>
