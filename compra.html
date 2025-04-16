@@ -48,8 +48,8 @@
     const containerPessoas = document.getElementById("pessoasContainer");
     const totalDiv = document.getElementById("total");
 
-    const nomesFemininos = ["maria", "ana", "julia", "larissa", "camila", "carla", "marcela", "mariana", "beatriz", "fernanda"];
-    const nomesMasculinos = ["joão", "jose", "lucas", "carlos", "rodrigo", "marcos", "bruno", "gabriel", "rafael", "pedro"];
+    const nomesFemininos = ["maria", "ana", "julia", "larissa", "camila", "carla", "marcela", "mariana", "beatriz", "fernanda", "juliana", "patricia", "aline"];
+    const nomesMasculinos = ["joão", "jose", "lucas", "carlos", "rodrigo", "marcos", "bruno", "gabriel", "rafael", "pedro", "andre", "vinicius", "matheus"];
 
     if (evento) {
       containerInfo.innerHTML = `<h2>${evento.nome}</h2><p><strong>Data:</strong> ${evento.data}</p><p><strong>Local:</strong> ${evento.local}</p><p><strong>Valores:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>`;
@@ -109,7 +109,7 @@
       const genero = document.getElementById("generoPadrao").value;
       const alerta = document.getElementById("alerta-" + index);
       if (nome.length > 2 && !verificarNomeGenero(nome, genero)) {
-        alerta.textContent = "Nome parece não combinar com o gênero selecionado.";
+        alerta.textContent = "Nome não permitido para este tipo de ingresso.";
       } else {
         alerta.textContent = "";
       }
@@ -129,8 +129,9 @@
         const nome = nomes[i].value;
         if (!nome) return alert("Preencha todos os nomes!");
         if (!verificarNomeGenero(nome, genero)) {
-          return alert(`O nome "${nome}" parece não combinar com o gênero "${genero}". Corrija para continuar.`);
+          return alert(`O nome "${nome}" não é permitido para ingresso do tipo "${genero}".`);
         }
+
         const valor = genero === "masculino" ? evento.masculino : evento.feminino;
         ingressos.push({
           nome,
