@@ -11,8 +11,8 @@
     label { display: block; margin-top: 1rem; }
     input, select { width: 100%; padding: 0.6rem; margin-top: 0.3rem; border-radius: 8px; border: 1px solid #ccc; }
     #total { margin-top: 1rem; font-weight: bold; }
+    .pessoa { margin-bottom: 1rem; background: #fff3e0; padding: 1rem; border-radius: 8px; }
     button { margin-top: 1.5rem; width: 100%; padding: 0.9rem; background-color: #ff9800; color: white; border: none; border-radius: 10px; font-size: 1rem; }
-    .nomePessoa { margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -26,16 +26,10 @@
     <label for="whats">WhatsApp:</label>
     <input type="text" id="whats" placeholder="Número com DDD">
 
-    <label for="genero">Gênero dos ingressos:</label>
-    <select id="genero" onchange="atualizarTotal()">
-      <option value="masculino">Masculino</option>
-      <option value="feminino">Feminino</option>
-    </select>
+    <label for="quantidade">Quantidade de ingressos:</label>
+    <input type="number" id="quantidade" value="1" min="1" max="10" onchange="gerarCamposPessoas()">
 
-    <label for="quantidade">Quantidade:</label>
-    <input type="number" id="quantidade" value="1" min="1" max="10" onchange="atualizarCampos()">
-
-    <div id="nomesPessoas"></div>
+    <div id="pessoasContainer"></div>
 
     <div id="total">Total: R$ 0,00</div>
 
@@ -44,52 +38,81 @@
 
   <script>
     const evento = JSON.parse(localStorage.getItem("eventoSelecionado"));
-    const infoDiv = document.getElementById("infoEvento");
+    const containerInfo = document.getElementById("infoEvento");
+    const containerPessoas = document.getElementById("pessoasContainer");
     const totalDiv = document.getElementById("total");
 
     if (evento) {
-      infoDiv.innerHTML = `<h2>${evento.nome}</h2><p><strong>Data:</strong> ${evento.data}</p><p><strong>Local:</strong> ${evento.local}</p><p><strong>Valor:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>`;
-      atualizarCampos();
+      containerInfo.innerHTML = `<h2>${evento.nome}</h2><p><strong>Data:</strong> ${evento.data}</p><p><strong>Local:</strong> ${evento.local}</p><p><strong>Valores:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>`;
+      gerarCamposPessoas();
     }
 
-    function atualizarCampos() {
-      const container = document.getElementById("nomesPessoas");
-      container.innerHTML = "";
+    function gerarCamposPessoas() {
       const qtd = parseInt(document.getElementById("quantidade").value);
-      const genero = document.getElementById("genero").value;
-      const preco = genero === "masculino" ? evento.masculino : evento.feminino;
-      totalDiv.textContent = "Total: R$ " + (preco * qtd).toFixed(2).replace(".", ",");
-
+      containerPessoas.innerHTML = "";
       for (let i = 1; i <= qtd; i++) {
-        const label = document.createElement("label");
-        label.textContent = "Nome da pessoa " + i;
-        const input = document.createElement("input");
-        input.type = "text";
-        input.className = "nomePessoa";
-        input.placeholder = "Nome da pessoa " + i;
-        input.required = true;
-        container.appendChild(label);
-        container.appendChild(input);
+        const div = document.createElement("div");
+        div.className = "pessoa";
+        div.innerHTML = `
+          <label>Nome da pessoa ${i}</label>
+          <input type="text" class="nomePessoa" placeholder="Nome completo" required>
+          <label>Gênero:</label>
+          <select class="generoPessoa" onchange="atualizarTotal()">
+            <option value="masculino">Masculino</option>
+            <option value="feminino">Feminino</option>
+          </select>
+        `;
+        containerPessoas.appendChild(div);
       }
+      atualizarTotal();
+    }
+
+    function atualizarTotal() {
+      const generos = document.querySelectorAll(".generoPessoa");
+      let total = 0;
+      generos.forEach(select => {
+        total += select.value === "masculino" ? evento.masculino : evento.feminino;
+      });
+      totalDiv.textContent = "Total: R$ " + total.toFixed(2).replace(".", ",");
+    }
+
+    function validarCPF(cpf) {
+      cpf = cpf.replace(/[^\d]+/g, "");
+      if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+      let soma = 0;
+      for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
+      let resto = (soma * 10) % 11;
+      if (resto === 10 || resto === 11) resto = 0;
+      if (resto !== parseInt(cpf.charAt(9))) return false;
+      soma = 0;
+      for (let i = 0; i < 10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
+      resto = (soma * 10) % 11;
+      if (resto === 10 || resto === 11) resto = 0;
+      return resto === parseInt(cpf.charAt(10));
     }
 
     function gerarPedido() {
       const cpf = document.getElementById("cpf").value;
       const whats = document.getElementById("whats").value;
-      const genero = document.getElementById("genero").value;
-      const quantidade = parseInt(document.getElementById("quantidade").value);
-      const nomeInputs = document.querySelectorAll(".nomePessoa");
-      const valorUnitario = genero === "masculino" ? evento.masculino : evento.feminino;
-      const ingressos = [];
+      const nomes = document.querySelectorAll(".nomePessoa");
+      const generos = document.querySelectorAll(".generoPessoa");
 
-      nomeInputs.forEach((input, i) => {
+      if (!validarCPF(cpf)) {
+        alert("CPF inválido!");
+        return;
+      }
+
+      const ingressos = [];
+      nomes.forEach((input, i) => {
+        const genero = generos[i].value;
+        const valor = genero === "masculino" ? evento.masculino : evento.feminino;
         ingressos.push({
           nome: input.value,
           cpf,
           whats,
           genero,
           pedido: Math.floor(100000 + Math.random() * 900000),
-          valor: valorUnitario,
+          valor,
           evento
         });
       });
