@@ -32,6 +32,7 @@
       color: white;
       font-size: 1rem;
       cursor: pointer;
+      margin: 10px 0;
     }
     canvas {
       margin-top: 1rem;
@@ -49,7 +50,7 @@
     <canvas id="qrcode" width="200" height="200"></canvas>
 
     <br><br>
-    <button onclick="confirmarPagamento()">Já paguei</button>
+    <button onclick="enviarWhats()">Já paguei</button>
   </div>
 
   <script>
@@ -70,8 +71,14 @@
       alert("Chave Pix copiada com sucesso!");
     }
 
-    function confirmarPagamento() {
-      window.location.href = "confirmacao.html";
+    function enviarWhats() {
+      const nome = encodeURIComponent(dados.nome);
+      const pedido = encodeURIComponent(dados.pedido);
+      const valor = encodeURIComponent("R$" + dados.valor);
+      const evento = encodeURIComponent(dados.evento.nome);
+      const msg = `Olá, acabei de fazer o pagamento do ingresso!%0A%0ANome: ${nome}%0APedido: ${pedido}%0AEvento: ${evento}%0AValor: ${valor}%0A%0APode validar pra mim?`;
+      const numero = "+5543991289944";
+      window.location.href = `https://wa.me/${numero}?text=${msg}`;
     }
   </script>
 </body>
