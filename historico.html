@@ -79,5 +79,38 @@
       window.location.href = "confirmacao.html";
     }
   </script>
+
+  <style id="tema-style"></style>
+  <button onclick="alternarTema()" style="position: fixed; top: 1rem; right: 1rem; background: #444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; z-index: 1000;">🌓 Tema</button>
+  <script>
+    const temas = {
+      claro: `
+        body { background: #fff8e1; color: #000; }
+        .container, .card, .pedido, .pessoa, .ingresso { background: white; color: #000; }
+        header { background: #ff9800; color: white; }
+        button { background: #ff9800; color: white; }
+      `,
+      escuro: `
+        body { background: #121212; color: #eee; }
+        .container, .card, .pedido, .pessoa, .ingresso { background: #1e1e1e; color: #eee; }
+        header { background: #333; color: #ff9800; }
+        button { background: #555; color: white; }
+      `
+    };
+
+    function aplicarTema(tema) {
+      document.getElementById("tema-style").innerHTML = temas[tema];
+      localStorage.setItem("temaPreferido", tema);
+    }
+
+    function alternarTema() {
+      const atual = localStorage.getItem("temaPreferido") || "claro";
+      const proximo = atual === "claro" ? "escuro" : "claro";
+      aplicarTema(proximo);
+    }
+
+    aplicarTema(localStorage.getItem("temaPreferido") || "claro");
+  </script>
+
 </body>
 </html>
