@@ -1,115 +1,105 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comprar Ingresso</title>
   <style>
-    body { font-family: Arial, sans-serif; background-color: #fff8e1; margin: 0; padding: 0; }
-    header { background-color: #ff9800; color: white; padding: 1rem; text-align: center; font-size: 1.4rem; }
-    .container { max-width: 600px; margin: auto; padding: 1rem; }
-    .evento-info { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-    label { display: block; margin-top: 1rem; }
-    input, select { width: 100%; padding: 0.6rem; margin-top: 0.3rem; border-radius: 8px; border: 1px solid #ccc; }
-    button { margin-top: 1.5rem; width: 100%; padding: 0.9rem; background-color: #ff9800; color: white; border: none; border-radius: 10px; font-size: 1rem; }
-    #total { margin-top: 1rem; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff8e1;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #ff9800;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.4rem;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 1rem;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.9rem;
+      background-color: #ff9800;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
   <header>Comprar Ingresso</header>
   <div class="container">
-    <div class="evento-info" id="eventoInfo"></div>
+    <div id="infoEvento"></div>
 
-    <label>CPF:</label>
-    <input type="text" id="cpf" onblur="verificarLimite()" placeholder="Digite seu CPF">
+    <label for="cpf">CPF:</label>
+    <input type="text" id="cpf" placeholder="Digite seu CPF">
 
-    <label>WhatsApp:</label>
+    <label for="whats">WhatsApp:</label>
     <input type="text" id="whats" placeholder="Número com DDD">
 
-    <label>Tipo de ingresso:</label>
-    <select id="genero" onchange="atualizarTotal()">
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" placeholder="Nome completo">
+
+    <label for="genero">Gênero:</label>
+    <select id="genero">
       <option value="masculino">Masculino</option>
       <option value="feminino">Feminino</option>
     </select>
 
-    <label>Quantidade:</label>
-    <input type="number" id="quantidade" value="1" min="1" max="10" onchange="atualizarTotal()">
-
-    <div id="total">Total: R$ 0,00</div>
-
-    <button onclick="gerarPedido()">Finalizar Compra</button>
+    <button onclick="gerarPedido()">Continuar para Pagamento</button>
   </div>
 
   <script>
     const evento = JSON.parse(localStorage.getItem("eventoSelecionado"));
-    const eventoId = evento?.nome?.toLowerCase().replace(/\\s+/g, '') || "evento";
-    const preco = { masculino: evento.masculino, feminino: evento.feminino };
+    const infoDiv = document.getElementById("infoEvento");
 
-    document.getElementById("eventoInfo").innerHTML = `
-      <h2>${evento.nome}</h2>
-      <p><strong>Data:</strong> ${evento.data}</p>
-      <p><strong>Local:</strong> ${evento.local}</p>
-      <p><strong>Ingressos:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>
-    `;
-
-    function atualizarTotal() {
-      const genero = document.getElementById("genero").value;
-      const qtd = parseInt(document.getElementById("quantidade").value);
-      const valor = preco[genero] * qtd;
-      document.getElementById("total").textContent = "Total: R$ " + valor.toFixed(2).replace(".", ",");
-    }
-
-    function verificarLimite() {
-      const cpf = document.getElementById("cpf").value.replace(/\\D/g, "");
-      const historico = JSON.parse(localStorage.getItem("limiteCPF") || "{}");
-      const usados = historico[eventoId]?.[cpf] || 0;
-      const qtd = parseInt(document.getElementById("quantidade").value);
-
-      if (usados + qtd > 10) {
-        alert("Este CPF já atingiu o limite de 10 ingressos para este evento.");
-        document.getElementById("quantidade").value = Math.max(0, 10 - usados);
-        atualizarTotal();
-      }
+    if (evento) {
+      infoDiv.innerHTML = `<h2>${evento.nome}</h2><p><strong>Data:</strong> ${evento.data}</p><p><strong>Local:</strong> ${evento.local}</p><p><strong>Valor:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>`;
+    } else {
+      infoDiv.innerHTML = '<p style="color:red">Evento não encontrado.</p>';
     }
 
     function gerarPedido() {
-      const cpf = document.getElementById("cpf").value.replace(/\\D/g, "");
+      const nome = document.getElementById("nome").value;
+      const cpf = document.getElementById("cpf").value;
       const whats = document.getElementById("whats").value;
       const genero = document.getElementById("genero").value;
-      const qtd = parseInt(document.getElementById("quantidade").value);
-      const historico = JSON.parse(localStorage.getItem("limiteCPF") || "{}");
-
-      if (!cpf || !whats || qtd <= 0) {
-        alert("Preencha todos os campos corretamente.");
-        return;
-      }
-
-      if (!historico[eventoId]) historico[eventoId] = {};
-      const usados = historico[eventoId][cpf] || 0;
-
-      if (usados + qtd > 10) {
-        alert("Limite ultrapassado. Você só pode comprar mais " + (10 - usados) + " ingressos.");
-        return;
-      }
-
-      historico[eventoId][cpf] = usados + qtd;
-      localStorage.setItem("limiteCPF", JSON.stringify(historico));
+      const valor = genero === "masculino" ? evento.masculino : evento.feminino;
+      const pedido = Math.floor(100000 + Math.random() * 900000);
 
       const ingresso = {
-        nome: "Comprador",
+        pedido,
+        evento,
+        nome,
         cpf,
         whats,
         genero,
-        quantidade: qtd,
-        pedido: Math.floor(100000 + Math.random() * 900000),
-        valor: preco[genero] * qtd,
-        evento
+        valor
       };
 
       localStorage.setItem("ingressoFinal", JSON.stringify(ingresso));
       window.location.href = "pagamento.html";
     }
-
-    atualizarTotal();
   </script>
 </body>
 </html>

@@ -5,36 +5,26 @@
   <title>Confirmação</title>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 </head>
-<body>
-  <h1>Ingressos Gerados!</h1>
-  <div id="conteudo"></div>
-  <button onclick="enviarWhats()">Enviar por WhatsApp</button>
+<body style="text-align:center; font-family:sans-serif; padding:2rem;">
+  <h1>✅ Compra Confirmada!</h1>
+  <p><strong>Pedido:</strong> <span id="pedido"></span></p>
+  <p><strong>Nome:</strong> <span id="nome"></span></p>
+  <p><strong>Valor:</strong> R$<span id="valor"></span></p>
+  <canvas id="qr" style="margin-top:20px;"></canvas>
 
   <script>
-    const ingresso = JSON.parse(localStorage.getItem("ingressoFinal"));
-    const div = document.getElementById("conteudo");
-
-    if (ingresso) {
-      div.innerHTML = `
-        <p><strong>Pedido:</strong> ${ingresso.pedido}</p>
-        <p><strong>Gênero:</strong> ${ingresso.genero}</p>
-        <p><strong>CPF:</strong> ${ingresso.cpf}</p>
-        <p><strong>Valor:</strong> R$ ${ingresso.valor.toFixed(2)}</p>
-      `;
-
-      const canvas = document.createElement("canvas");
+    const dados = JSON.parse(localStorage.getItem("ingressoFinal"));
+    if (dados) {
+      document.getElementById("pedido").textContent = dados.pedido;
+      document.getElementById("nome").textContent = dados.nome;
+      document.getElementById("valor").textContent = dados.valor.toFixed(2);
       new QRious({
-        element: canvas,
-        value: "Pedido: " + ingresso.pedido + "\\nCPF: " + ingresso.cpf,
+        element: document.getElementById("qr"),
+        value: `Pedido: ${dados.pedido}\nNome: ${dados.nome}\nValor: R$${dados.valor}`,
         size: 200
       });
-      div.appendChild(canvas);
-    }
-
-    function enviarWhats() {
-      const numero = "5543991289991";
-      const texto = `Olá, comprei ingresso do Arretados:%0APedido: ${ingresso.pedido}%0ACPF: ${ingresso.cpf}%0AGênero: ${ingresso.genero}%0AValor: R$ ${ingresso.valor}`;
-      window.open(`https://wa.me/${numero}?text=${texto}`, "_blank");
+    } else {
+      document.body.innerHTML = '<p>Dados não encontrados.</p>';
     }
   </script>
 </body>

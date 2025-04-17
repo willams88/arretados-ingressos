@@ -5,11 +5,17 @@
   <title>Arretados Ingressos</title>
   <style>
     body { font-family: Arial, sans-serif; background: #fff8e1; margin: 0; padding: 0; }
-    header { background: #ff9800; color: white; text-align: center; padding: 1rem; font-size: 1.4rem; }
-    .eventos { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1rem; justify-content: center; }
+    header { text-align: center; padding: 1rem; }
+    header img { max-width: 300px; height: auto; margin: 0 auto; }
+    .eventos {
+      display: flex; flex-wrap: wrap; gap: 1rem;
+      padding: 1rem; justify-content: center;
+    }
     .card {
-      background: white; border-radius: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-      padding: 1rem; width: 260px; cursor: pointer; transition: transform 0.2s;
+      background: white; border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      padding: 1rem; width: 260px; cursor: pointer;
+      transition: transform 0.2s;
     }
     .card:hover { transform: scale(1.03); }
     .card h3 { margin: 0 0 0.5rem 0; color: #d84315; }
@@ -17,7 +23,10 @@
   </style>
 </head>
 <body>
-  <header>Arretados Ingressos</header>
+  <header>
+    <img src="logo-tardizinha.jpg" alt="Logo Tardizinha dos Arretados">
+  </header>
+
   <div class="eventos" id="listaEventos"></div>
 
   <script>
