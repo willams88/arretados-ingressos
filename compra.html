@@ -2,151 +2,103 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Comprar Ingresso</title>
+  <title>Compra com Limite por CPF</title>
   <style>
     body { font-family: Arial, sans-serif; background-color: #fff8e1; margin: 0; padding: 0; }
     header { background-color: #ff9800; color: white; padding: 1rem; text-align: center; font-size: 1.4rem; }
     .container { max-width: 600px; margin: auto; padding: 1rem; }
     label { display: block; margin-top: 1rem; }
     input, select { width: 100%; padding: 0.6rem; margin-top: 0.3rem; border-radius: 8px; border: 1px solid #ccc; }
-    #total { margin-top: 1rem; font-weight: bold; }
-    .pessoa { margin-bottom: 1rem; background: #fff3e0; padding: 1rem; border-radius: 8px; }
     button { margin-top: 1.5rem; width: 100%; padding: 0.9rem; background-color: #ff9800; color: white; border: none; border-radius: 10px; font-size: 1rem; }
-    .alerta { color: red; font-size: 0.9rem; margin-top: 0.3rem; }
+    #total { margin-top: 1rem; font-weight: bold; }
   </style>
 </head>
 <body>
   <header>Comprar Ingresso</header>
   <div class="container">
-    <div id="infoEvento"></div>
+    <label>CPF:</label>
+    <input type="text" id="cpf" onblur="verificarLimite()" placeholder="Digite seu CPF">
 
-    <label for="cpf">CPF:</label>
-    <input type="text" id="cpf" placeholder="Digite seu CPF">
-
-    <label for="whats">WhatsApp:</label>
+    <label>WhatsApp:</label>
     <input type="text" id="whats" placeholder="Número com DDD">
 
-    <label for="generoPadrao">Tipo de ingresso:</label>
-    <select id="generoPadrao" onchange="gerarCamposPessoas()">
+    <label>Tipo de ingresso:</label>
+    <select id="genero" onchange="atualizarTotal()">
       <option value="masculino">Masculino</option>
       <option value="feminino">Feminino</option>
     </select>
 
-    <label for="quantidade">Quantidade de ingressos:</label>
-    <input type="number" id="quantidade" value="1" min="1" max="10" onchange="gerarCamposPessoas()">
-
-    <div id="pessoasContainer"></div>
+    <label>Quantidade:</label>
+    <input type="number" id="quantidade" value="1" min="1" max="10" onchange="atualizarTotal()">
 
     <div id="total">Total: R$ 0,00</div>
 
-    <button onclick="gerarPedido()">Continuar para Pagamento</button>
+    <button onclick="gerarPedido()">Finalizar Compra</button>
   </div>
 
   <script>
-    const evento = JSON.parse(localStorage.getItem("eventoSelecionado"));
-    const containerInfo = document.getElementById("infoEvento");
-    const containerPessoas = document.getElementById("pessoasContainer");
-    const totalDiv = document.getElementById("total");
-
-    const nomesFemininos = ["maria", "ana", "julia", "larissa", "camila", "carla", "marcela", "mariana", "beatriz", "fernanda", "juliana", "patricia", "aline"];
-    const nomesMasculinos = ["joão", "jose", "lucas", "carlos", "rodrigo", "marcos", "bruno", "gabriel", "rafael", "pedro", "andre", "vinicius", "matheus"];
-
-    if (evento) {
-      containerInfo.innerHTML = `<h2>${evento.nome}</h2><p><strong>Data:</strong> ${evento.data}</p><p><strong>Local:</strong> ${evento.local}</p><p><strong>Valores:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>`;
-      gerarCamposPessoas();
-    }
-
-    function gerarCamposPessoas() {
-      const qtd = parseInt(document.getElementById("quantidade").value);
-      const genero = document.getElementById("generoPadrao").value;
-      containerPessoas.innerHTML = "";
-      for (let i = 1; i <= qtd; i++) {
-        const div = document.createElement("div");
-        div.className = "pessoa";
-        div.innerHTML = `
-          <label>Nome da pessoa ${i}</label>
-          <input type="text" class="nomePessoa" placeholder="Nome completo" oninput="verificarNomeInstantaneo(this, ${i})">
-          <div id="alerta-${i}" class="alerta"></div>
-          <label>Gênero:</label>
-          <input type="text" value="${genero}" class="generoPessoa" readonly>
-        `;
-        containerPessoas.appendChild(div);
-      }
-      atualizarTotal();
-    }
+    const eventoId = "tardizinha2025";
+    const preco = { masculino: 35, feminino: 30 };
 
     function atualizarTotal() {
-      const genero = document.getElementById("generoPadrao").value;
+      const genero = document.getElementById("genero").value;
       const qtd = parseInt(document.getElementById("quantidade").value);
-      const preco = genero === "masculino" ? evento.masculino : evento.feminino;
-      totalDiv.textContent = "Total: R$ " + (preco * qtd).toFixed(2).replace(".", ",");
+      const valor = preco[genero] * qtd;
+      document.getElementById("total").textContent = "Total: R$ " + valor.toFixed(2).replace(".", ",");
     }
 
-    function validarCPF(cpf) {
-      cpf = cpf.replace(/[^\d]+/g, "");
-      if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-      let soma = 0;
-      for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
-      let resto = (soma * 10) % 11;
-      if (resto === 10 || resto === 11) resto = 0;
-      if (resto !== parseInt(cpf.charAt(9))) return false;
-      soma = 0;
-      for (let i = 0; i < 10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
-      resto = (soma * 10) % 11;
-      if (resto === 10 || resto === 11) resto = 0;
-      return resto === parseInt(cpf.charAt(10));
-    }
+    function verificarLimite() {
+      const cpf = document.getElementById("cpf").value.replace(/\D/g, "");
+      const historico = JSON.parse(localStorage.getItem("limiteCPF") || "{}");
+      const usados = historico[eventoId]?.[cpf] || 0;
+      const qtd = parseInt(document.getElementById("quantidade").value);
 
-    function verificarNomeGenero(nome, genero) {
-      const nomeLower = nome.toLowerCase().split(" ")[0];
-      if (genero === "feminino" && nomesMasculinos.includes(nomeLower)) return false;
-      if (genero === "masculino" && nomesFemininos.includes(nomeLower)) return false;
-      return true;
-    }
-
-    function verificarNomeInstantaneo(input, index) {
-      const nome = input.value;
-      const genero = document.getElementById("generoPadrao").value;
-      const alerta = document.getElementById("alerta-" + index);
-      if (nome.length > 2 && !verificarNomeGenero(nome, genero)) {
-        alerta.textContent = "Nome não permitido para este tipo de ingresso.";
-      } else {
-        alerta.textContent = "";
+      if (usados + qtd > 10) {
+        alert("Este CPF já atingiu o limite de 10 ingressos para este evento.");
+        document.getElementById("quantidade").value = Math.max(0, 10 - usados);
+        atualizarTotal();
       }
     }
 
     function gerarPedido() {
-      const cpf = document.getElementById("cpf").value;
+      const cpf = document.getElementById("cpf").value.replace(/\D/g, "");
       const whats = document.getElementById("whats").value;
-      const genero = document.getElementById("generoPadrao").value;
-      const nomes = document.querySelectorAll(".nomePessoa");
+      const genero = document.getElementById("genero").value;
+      const qtd = parseInt(document.getElementById("quantidade").value);
+      const historico = JSON.parse(localStorage.getItem("limiteCPF") || "{}");
 
-      if (!cpf || !whats || nomes.length === 0) return alert("Preencha todos os campos!");
-      if (!validarCPF(cpf)) return alert("CPF inválido!");
-
-      const ingressos = [];
-      for (let i = 0; i < nomes.length; i++) {
-        const nome = nomes[i].value;
-        if (!nome) return alert("Preencha todos os nomes!");
-        if (!verificarNomeGenero(nome, genero)) {
-          return alert(`O nome "${nome}" não é permitido para ingresso do tipo "${genero}".`);
-        }
-
-        const valor = genero === "masculino" ? evento.masculino : evento.feminino;
-        ingressos.push({
-          nome,
-          cpf,
-          whats,
-          genero,
-          pedido: Math.floor(100000 + Math.random() * 900000),
-          valor,
-          evento
-        });
+      if (!cpf || !whats || qtd <= 0) {
+        alert("Preencha todos os campos corretamente.");
+        return;
       }
 
-      localStorage.setItem("ingressosGerados", JSON.stringify(ingressos));
-      window.location.href = "pagamento.html";
+      if (!historico[eventoId]) historico[eventoId] = {};
+      const usados = historico[eventoId][cpf] || 0;
+
+      if (usados + qtd > 10) {
+        alert("Limite ultrapassado. Você só pode comprar mais " + (10 - usados) + " ingressos.");
+        return;
+      }
+
+      historico[eventoId][cpf] = usados + qtd;
+      localStorage.setItem("limiteCPF", JSON.stringify(historico));
+
+      const ingresso = {
+        nome: "Comprador",
+        cpf,
+        whats,
+        genero,
+        quantidade: qtd,
+        pedido: Math.floor(100000 + Math.random() * 900000),
+        valor: preco[genero] * qtd,
+        evento: eventoId
+      };
+
+      localStorage.setItem("ingressoFinal", JSON.stringify(ingresso));
+      window.location.href = "confirmacao.html";
     }
+
+    atualizarTotal();
   </script>
 </body>
 </html>
