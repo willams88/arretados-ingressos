@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meus Ingressos</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fdf6e3; padding: 2rem; }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 { color: #ff9800; text-align: center; }
+    .ingresso {
+      border-top: 1px solid #ccc;
+      padding: 1rem 0;
+      margin-top: 1rem;
+    }
+    .qr-code {
+      margin-top: 1rem;
+    }
+    .realizacao {
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      font-weight: bold;
+      color: #555;
+    }
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      margin-top: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎟️ Meus Ingressos</h1>
+    
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <button onclick="gerarPDF()" style="margin-bottom: 2rem; background:#673ab7;">📄 Gerar PDF com Ingressos</button>
+  <script>
+    function gerarPDF() {
+      const area = document.getElementById("listaIngressos");
+      const opt = {
+        margin: 0.5,
+        filename: 'meus-ingressos.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(area).save();
+    }
+  </script>
+
+    <div id="listaIngressos"></div>
+  </div>
+
+  <script>
+    function gerarCodigo() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ123456789";
+      return Array.from({length: 6}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+
+    const lista = document.getElementById("listaIngressos");
+    const historico = JSON.parse(localStorage.getItem("historicoPedidos") || "[]");
+
+    if (historico.length === 0) {
+      lista.innerHTML = "<p>Nenhum ingresso encontrado.</p>";
+    } else {
+      historico.forEach(pedido => {
+        pedido.ingressos.forEach((pessoa, i) => {
+          const id = `ingresso-${pedido.pedido}-${i}`;
+          const ingressoDiv = document.createElement("div");
+          ingressoDiv.className = "ingresso";
+          ingressoDiv.id = id;
+          ingressoDiv.innerHTML = `
+            <img src="logo-arretados.jpg" class="logo" />
+            <p><strong>Evento:</strong> ${pedido.evento.nome}</p>
+            <p><strong>Nome:</strong> ${pessoa.nome}</p>
+            <p><strong>Gênero:</strong> ${pessoa.genero}</p>
+            <p><strong>Pedido:</strong> ${pedido.pedido}</p>
+            <p><strong>CPF do Comprador:</strong> ${pedido.cpf}</p>
+            <p><strong>Código de Segurança:</strong> <span id="cod-${id}"></span></p>
+            <div class="qr-code"><canvas id="qr-${id}"></canvas></div>
+            <button onclick="salvar('${id}')">Salvar como imagem</button>
+          `;
+          lista.appendChild(ingressoDiv);
+
+          document.getElementById(`cod-${id}`).textContent = gerarCodigo();
+          new QRious({
+            element: document.getElementById(`qr-${id}`),
+            value: `Evento: ${pedido.evento.nome}\nPedido: ${pedido.pedido}\nNome: ${pessoa.nome}\nGênero: ${pessoa.genero}\nCPF: ${pedido.cpf}`,
+            size: 150
+          });
+        });
+      });
+    }
+
+    function salvar(id) {
+      const el = document.getElementById(id);
+      html2canvas(el).then(canvas => {
+        const link = document.createElement("a");
+        link.download = id + ".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }
+  </script>
+
+  <style id="tema-style"></style>
+  <button onclick="alternarTema()" style="position: fixed; top: 1rem; right: 1rem; background: #444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; z-index: 1000;">🌓 Tema</button>
+  <script>
+    const temas = {
+      claro: `
+        body { background: #fff8e1; color: #000; }
+        .container, .card, .pedido, .pessoa, .ingresso { background: white; color: #000; }
+        header { background: #ff9800; color: white; }
+        button { background: #ff9800; color: white; }
+      `,
+      escuro: `
+        body { background: #121212; color: #eee; }
+        .container, .card, .pedido, .pessoa, .ingresso { background: #1e1e1e; color: #eee; }
+        header { background: #333; color: #ff9800; }
+        button { background: #555; color: white; }
+      `
+    };
+
+    function aplicarTema(tema) {
+      document.getElementById("tema-style").innerHTML = temas[tema];
+      localStorage.setItem("temaPreferido", tema);
+    }
+
+    function alternarTema() {
+      const atual = localStorage.getItem("temaPreferido") || "claro";
+      const proximo = atual === "claro" ? "escuro" : "claro";
+      aplicarTema(proximo);
+    }
+
+    aplicarTema(localStorage.getItem("temaPreferido") || "claro");
+  </script>
+
+</body>
+</html>

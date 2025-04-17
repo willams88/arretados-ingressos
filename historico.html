@@ -56,13 +56,23 @@
           <p><strong>Pedido:</strong> ${pedido.pedido}</p>
           <p><strong>CPF:</strong> ${pedido.cpf}</p>
           <p><strong>Total:</strong> R$ ${pedido.valor.toFixed(2)}</p>
-          <button onclick="ver(${index})">Ver detalhes</button>
+          <button onclick="ver(${index})">Ver detalhes</button> <button onclick="reenviar(
         `;
         listaDiv.appendChild(div);
       });
     }
 
+    
+    function reenviar(index) {
+      const historico = JSON.parse(localStorage.getItem("historicoPedidos") || "[]");
+      const pedido = historico[index];
+      const numero = "5543991289991";
+      const texto = `Olá! Aqui estão os dados do meu pedido:%0AEvento: ${pedido.evento.nome}%0APedido: ${pedido.pedido}%0ACPF: ${pedido.cpf}`;
+      window.open(`https://wa.me/${numero}?text=${texto}`, "_blank");
+    }
+
     function ver(index) {
+
       const historico = JSON.parse(localStorage.getItem("historicoPedidos") || "[]");
       const pedido = historico[index];
       localStorage.setItem("ingressoFinal", JSON.stringify(pedido));

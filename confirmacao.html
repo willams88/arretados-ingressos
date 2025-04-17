@@ -59,8 +59,26 @@
 <body>
   <div class="container">
     <h1>Ingressos Gerados</h1>
+    <div id="contagem" style="font-size:1.1rem; color:#ff5722; margin-top:0.5rem;"></div>
     <div class="dados" id="info"></div>
     <div id="listaIngressos"></div>
+    
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <button onclick="gerarPDF()" style="margin-top: 1rem; background:#673ab7;">📄 Gerar PDF com Ingressos</button>
+  <script>
+    function gerarPDF() {
+      const area = document.getElementById("listaIngressos");
+      const opt = {
+        margin: 0.5,
+        filename: 'meus-ingressos.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(area).save();
+    }
+  </script>
+
     <button onclick="enviarWhats()">Enviar por WhatsApp</button>
   </div>
 
@@ -70,10 +88,21 @@
     const lista = document.getElementById("listaIngressos");
 
     if (ingresso) {
+      
+    const dataEvento = new Date(ingresso.evento.data.split("/").reverse().join("-") + "T00:00:00");
+    const hoje = new Date();
+    const diasRestantes = Math.ceil((dataEvento - hoje) / (1000 * 60 * 60 * 24));
+    const texto = diasRestantes > 0
+      ? `⏳ Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} para o evento!`
+      : diasRestantes === 0
+      ? "🎉 É hoje o evento!"
+      : "✅ Evento já aconteceu.";
+    document.getElementById("contagem").textContent = texto;
+
       div.innerHTML = `
         <p><strong>Evento:</strong> ${ingresso.evento.nome}</p>
         <p><strong>Pedido:</strong> ${ingresso.pedido}</p>
-        <p><strong>CPF:</strong> ${ingresso.cpf}</p>
+        <p><strong>CPF do Comprador:</strong> ${ingresso.cpf}</p>
         <p><strong>WhatsApp:</strong> ${ingresso.whats}</p>
         <p><strong>Total:</strong> R$ ${ingresso.valor.toFixed(2)}</p>
       `;
@@ -92,6 +121,7 @@
           <p><strong>Gênero:</strong> ${pessoa.genero}</p>
           <p><strong>Pedido:</strong> ${ingresso.pedido}</p>
           <p><strong>Evento:</strong> ${ingresso.evento.nome}</p>
+          <p><strong>Código de Segurança:</strong> <span class="codigo" id="codigo-${index}"></span></p>
           <div class="qr-code"><canvas id="${canvasId}"></canvas></div>
           <button class="salvar" onclick="salvarImagem('${idDiv}')">Salvar ingresso como imagem</button>
         `;
@@ -106,7 +136,14 @@
       });
     }
 
+    
+    function gerarCodigo(tam) {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ123456789";
+      return Array.from({length: tam}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+    }
+
     function salvarImagem(id) {
+
       const el = document.getElementById(id);
       html2canvas(el).then(canvas => {
         const link = document.createElement("a");
@@ -122,5 +159,38 @@
       window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, "_blank");
     }
   </script>
+
+  <style id="tema-style"></style>
+  <button onclick="alternarTema()" style="position: fixed; top: 1rem; right: 1rem; background: #444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; z-index: 1000;">🌓 Tema</button>
+  <script>
+    const temas = {
+      claro: `
+        body { background: #fff8e1; color: #000; }
+        .container, .card, .pedido, .pessoa, .ingresso { background: white; color: #000; }
+        header { background: #ff9800; color: white; }
+        button { background: #ff9800; color: white; }
+      `,
+      escuro: `
+        body { background: #121212; color: #eee; }
+        .container, .card, .pedido, .pessoa, .ingresso { background: #1e1e1e; color: #eee; }
+        header { background: #333; color: #ff9800; }
+        button { background: #555; color: white; }
+      `
+    };
+
+    function aplicarTema(tema) {
+      document.getElementById("tema-style").innerHTML = temas[tema];
+      localStorage.setItem("temaPreferido", tema);
+    }
+
+    function alternarTema() {
+      const atual = localStorage.getItem("temaPreferido") || "claro";
+      const proximo = atual === "claro" ? "escuro" : "claro";
+      aplicarTema(proximo);
+    }
+
+    aplicarTema(localStorage.getItem("temaPreferido") || "claro");
+  </script>
+
 </body>
 </html>

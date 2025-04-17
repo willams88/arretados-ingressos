@@ -68,6 +68,40 @@
     }
   </script>
 
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-messaging-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCgFN0lCf0xeJaLnWkTfjAbvDBwQXxXe0A",
+      authDomain: "arretados-ingressos-app.firebaseapp.com",
+      projectId: "arretados-ingressos-app",
+      storageBucket: "arretados-ingressos-app.firebasestorage.app",
+      messagingSenderId: "309467408671",
+      appId: "1:309467408671:web:d4be567df9b4d39a1e282a",
+      measurementId: "G-R5V0QVJBB5"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    messaging.getToken({ vapidKey: "BO0mYHX_38xz7Q6CyJMNKikd-0" }).then((currentToken) => {
+      if (currentToken) {
+        console.log("Token do dispositivo:", currentToken);
+        // Aqui podemos enviar esse token pro backend no futuro
+      } else {
+        console.warn("Nenhum token disponível. Solicite permissão para gerar um.");
+      }
+    }).catch((err) => {
+      console.error("Erro ao buscar token:", err);
+    });
+
+    Notification.requestPermission().then(permission => {
+      if (permission === "granted") {
+        console.log("Notificações permitidas.");
+      }
+    });
+  </script>
+
 </head>
 <body>
   <header>Arretados Ingressos</header>
@@ -122,5 +156,39 @@
       window.location.href = "compra.html";
     }
   </script>
+
+  <style id="tema-style"></style>
+  <button onclick="alternarTema()" style="position: fixed; top: 1rem; right: 1rem; background: #444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">🌓 Tema</button>
+  <script>
+    const temas = {
+      claro: `
+        body { background: #fff8e1; color: #000; }
+        .card { background: white; color: #000; }
+        header { background: #ff9800; color: white; }
+        button { background: #ff9800; color: white; }
+      `,
+      escuro: `
+        body { background: #121212; color: #eee; }
+        .card { background: #1e1e1e; color: #eee; }
+        header { background: #333; color: #ff9800; }
+        button { background: #555; color: white; }
+      `
+    };
+
+    function aplicarTema(tema) {
+      document.getElementById("tema-style").innerHTML = temas[tema];
+      localStorage.setItem("temaPreferido", tema);
+    }
+
+    function alternarTema() {
+      const atual = localStorage.getItem("temaPreferido") || "claro";
+      const proximo = atual === "claro" ? "escuro" : "claro";
+      aplicarTema(proximo);
+    }
+
+    aplicarTema(localStorage.getItem("temaPreferido") || "claro");
+  </script>
+
+<div style="text-align:center; margin-top: 2rem;"><a href="buscar-cpf.html"><button style="background:#4caf50;">🔍 Buscar Ingressos por CPF</button></a></div>
 </body>
 </html>
