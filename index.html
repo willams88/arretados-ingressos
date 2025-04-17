@@ -3,9 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <title>Arretados Ingressos</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fff8e1; margin: 0; padding: 0; }
+    header { background: #ff9800; color: white; text-align: center; padding: 1rem; font-size: 1.4rem; }
+    .eventos { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1rem; justify-content: center; }
+    .card {
+      background: white; border-radius: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      padding: 1rem; width: 260px; cursor: pointer; transition: transform 0.2s;
+    }
+    .card:hover { transform: scale(1.03); }
+    .card h3 { margin: 0 0 0.5rem 0; color: #d84315; }
+    .card p { margin: 0.3rem 0; }
+  </style>
 </head>
 <body>
-  <h1>Bem-vindo ao Arretados Ingressos</h1>
-  <a href="compra.html">Comprar Ingressos</a>
+  <header>Arretados Ingressos</header>
+  <div class="eventos" id="listaEventos"></div>
+
+  <script>
+    const eventos = [
+      { nome: "Tardizinha dos Arretados", data: "25/05/2025", local: "AABB de Rolândia", masculino: 35, feminino: 30 },
+      { nome: "Arrasta Pé do Sertão", data: "15/06/2025", local: "Parque São João", masculino: 40, feminino: 35 },
+      { nome: "Noite do Camaleão", data: "05/07/2025", local: "Clube Arretado", masculino: 50, feminino: 40 }
+    ];
+
+    const lista = document.getElementById("listaEventos");
+
+    eventos.forEach(ev => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.onclick = () => {
+        localStorage.setItem("eventoSelecionado", JSON.stringify(ev));
+        window.location.href = "compra.html";
+      };
+      card.innerHTML = `
+        <h3>${ev.nome}</h3>
+        <p><strong>Data:</strong> ${ev.data}</p>
+        <p><strong>Local:</strong> ${ev.local}</p>
+        <p><strong>Ingressos:</strong> M R$${ev.masculino} | F R$${ev.feminino}</p>
+      `;
+      lista.appendChild(card);
+    });
+  </script>
 </body>
 </html>
