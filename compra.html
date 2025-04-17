@@ -1,105 +1,172 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Comprar Ingresso</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #fff8e1;
-      margin: 0;
-      padding: 0;
+    body { font-family: Arial; background: #fff8e1; margin: 0; padding: 0; }
+    header { background: #ff9800; color: white; padding: 1rem; text-align: center; }
+    .container { max-width: 700px; margin: auto; padding: 1rem; }
+    .evento-info {
+      background: white; padding: 1rem; border-radius: 10px;
+      margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem;
     }
-    header {
-      background-color: #ff9800;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.4rem;
+    .evento-texto { flex: 1; }
+    .evento-logo {
+      max-width: 140px;
+      border-radius: 12px;
     }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      padding: 1rem;
-    }
-    label {
-      display: block;
-      margin-top: 1rem;
-    }
+    label { display: block; margin-top: 1rem; }
     input, select {
-      width: 100%;
-      padding: 0.6rem;
-      margin-top: 0.3rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      width: 100%; padding: 0.6rem; margin-top: 0.3rem;
+      border-radius: 8px; border: 1px solid #ccc;
     }
+    .pessoa { background: #fff3e0; padding: 0.8rem; border-radius: 8px; margin-top: 1rem; }
     button {
-      margin-top: 1.5rem;
-      width: 100%;
-      padding: 0.9rem;
-      background-color: #ff9800;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
+      margin-top: 1.5rem; width: 100%;
+      padding: 1rem; font-size: 1rem;
+      background: #ff9800; color: white;
+      border: none; border-radius: 10px;
     }
+    #total { margin-top: 1rem; font-weight: bold; font-size: 1.1rem; }
   </style>
 </head>
 <body>
   <header>Comprar Ingresso</header>
   <div class="container">
-    <div id="infoEvento"></div>
+    <div id="eventoInfo"></div>
 
-    <label for="cpf">CPF:</label>
+    <label>CPF:</label>
     <input type="text" id="cpf" placeholder="Digite seu CPF">
 
-    <label for="whats">WhatsApp:</label>
-    <input type="text" id="whats" placeholder="Número com DDD">
+    <label>WhatsApp:</label>
+    <input type="text" id="whats" placeholder="Ex: 43991234567">
 
-    <label for="nome">Nome:</label>
-    <input type="text" id="nome" placeholder="Nome completo">
+    <label>Quantidade de ingressos:</label>
+    <input type="number" id="quantidade" min="1" max="10" value="1" onchange="gerarCampos()">
 
-    <label for="genero">Gênero:</label>
-    <select id="genero">
-      <option value="masculino">Masculino</option>
-      <option value="feminino">Feminino</option>
-    </select>
+    <div id="pessoas"></div>
 
-    <button onclick="gerarPedido()">Continuar para Pagamento</button>
+    <div id="total">Total: R$ 0,00</div>
+    <button onclick="finalizar()">Continuar para Pagamento</button>
   </div>
 
   <script>
     const evento = JSON.parse(localStorage.getItem("eventoSelecionado"));
-    const infoDiv = document.getElementById("infoEvento");
+    evento.logo = "logo-tardizinha.jpg";
 
-    if (evento) {
-      infoDiv.innerHTML = `<h2>${evento.nome}</h2><p><strong>Data:</strong> ${evento.data}</p><p><strong>Local:</strong> ${evento.local}</p><p><strong>Valor:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>`;
-    } else {
-      infoDiv.innerHTML = '<p style="color:red">Evento não encontrado.</p>';
+    const preco = { masculino: evento.masculino, feminino: evento.feminino };
+    const nomesFemininos = ["ana", "maria", "juliana", "fernanda", "adriana", "amanda", "bianca", "adriele", "vanessa", "patricia"];
+    const nomesMasculinos = ["joão", "carlos", "pedro", "lucas", "matheus", "willams", "rodrigo", "rafael", "bruno", "marcos"];
+
+    document.getElementById("eventoInfo").innerHTML = `
+      <div class="evento-info">
+        <div class="evento-texto">
+          <h2>${evento.nome}</h2>
+          <p><strong>Data:</strong> ${evento.data}</p>
+          <p><strong>Local:</strong> ${evento.local}</p>
+          <p><strong>Valores:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>
+        </div>
+        <img src="${evento.logo}" alt="Logo do evento" class="evento-logo" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover;">
+      </div>
+    `;
+
+    function gerarCampos() {
+      const qtd = parseInt(document.getElementById("quantidade").value);
+      const container = document.getElementById("pessoas");
+      container.innerHTML = "";
+      for (let i = 0; i < qtd; i++) {
+        const div = document.createElement("div");
+        div.className = "pessoa";
+        div.innerHTML = `
+          <label>Nome da Pessoa ${i + 1}</label>
+          <input type="text" id="nome_${i}" placeholder="Nome completo" required>
+          <label>Gênero:</label>
+          <select id="genero_${i}" onchange="atualizarTotal()">
+            <option value="masculino">Masculino</option>
+            <option value="feminino">Feminino</option>
+          </select>
+        `;
+        container.appendChild(div);
+      }
+      atualizarTotal();
     }
 
-    function gerarPedido() {
-      const nome = document.getElementById("nome").value;
-      const cpf = document.getElementById("cpf").value;
-      const whats = document.getElementById("whats").value;
-      const genero = document.getElementById("genero").value;
-      const valor = genero === "masculino" ? evento.masculino : evento.feminino;
-      const pedido = Math.floor(100000 + Math.random() * 900000);
+    function atualizarTotal() {
+      const qtd = parseInt(document.getElementById("quantidade").value);
+      let total = 0;
+      for (let i = 0; i < qtd; i++) {
+        const genero = document.getElementById(`genero_${i}`).value;
+        total += preco[genero];
+      }
+      document.getElementById("total").textContent = "Total: R$ " + total.toFixed(2).replace(".", ",");
+    }
 
-      const ingresso = {
-        pedido,
-        evento,
-        nome,
-        cpf,
-        whats,
-        genero,
-        valor
+    function validarCPF(cpf) {
+      cpf = cpf.replace(/[^\d]+/g, '');
+      if (cpf.length !== 11 || /^(\d)+$/.test(cpf)) return false;
+      let soma = 0, resto;
+      for (let i = 1; i <= 9; i++) soma += parseInt(cpf.charAt(i-1)) * (11 - i);
+      resto = (soma * 10) % 11;
+      if (resto === 10 || resto === 11) resto = 0;
+      if (resto !== parseInt(cpf.charAt(9))) return false;
+      soma = 0;
+      for (let i = 1; i <= 10; i++) soma += parseInt(cpf.charAt(i-1)) * (12 - i);
+      resto = (soma * 10) % 11;
+      if (resto === 10 || resto === 11) resto = 0;
+      return resto === parseInt(cpf.charAt(10));
+    }
+
+    function nomeCombina(nome, genero) {
+      const primeiro = nome.split(" ")[0].toLowerCase();
+      if (genero === "feminino") return nomesFemininos.includes(primeiro);
+      if (genero === "masculino") return nomesMasculinos.includes(primeiro);
+      return false;
+    }
+
+    function finalizar() {
+      const cpf = document.getElementById("cpf").value.trim();
+      const whats = document.getElementById("whats").value.trim();
+      const qtd = parseInt(document.getElementById("quantidade").value);
+      if (!cpf || !validarCPF(cpf)) {
+        alert("CPF inválido.");
+        return;
+      }
+      if (!whats) {
+        alert("Informe o WhatsApp.");
+        return;
+      }
+
+      const lista = [];
+      let total = 0;
+      for (let i = 0; i < qtd; i++) {
+        const nome = document.getElementById(`nome_${i}`).value.trim();
+        const genero = document.getElementById(`genero_${i}`).value;
+        if (!nome) {
+          alert("Preencha o nome de todas as pessoas.");
+          return;
+        }
+        if (!nomeCombina(nome, genero)) {
+          alert(`O nome "${nome}" parece não combinar com o gênero "${genero}". Verifique para evitar problemas no acesso.`);
+          return;
+        }
+        total += preco[genero];
+        lista.push({ nome, genero });
+      }
+
+      const pedido = Math.floor(100000 + Math.random() * 900000);
+      const dados = {
+        evento, cpf, whats, pedido,
+        ingressos: lista,
+        valor: total
       };
 
-      localStorage.setItem("ingressoFinal", JSON.stringify(ingresso));
+      localStorage.setItem("ingressoFinal", JSON.stringify(dados));
       window.location.href = "pagamento.html";
     }
+
+    gerarCampos();
   </script>
 </body>
 </html>
