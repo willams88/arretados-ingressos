@@ -2,29 +2,124 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Confirmação</title>
+  <title>Confirmação do Pedido</title>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fffefc; padding: 2rem; }
+    .container {
+      background: white;
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 { color: #4caf50; }
+    .dados { text-align: left; margin-top: 1.5rem; }
+    .dados p { margin: 0.3rem 0; }
+    .ingresso {
+      border-top: 1px solid #ccc;
+      padding: 1rem 0;
+      margin-top: 1rem;
+      position: relative;
+    }
+    .qr-code {
+      margin-top: 1rem;
+    }
+    .logo-arretados {
+      margin-top: 1rem;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+    }
+    .realizacao {
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      font-weight: bold;
+      color: #444;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      background: #25d366;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .salvar {
+      background: #2196f3;
+      margin-top: 0.5rem;
+    }
+  </style>
 </head>
-<body style="text-align:center; font-family:sans-serif; padding:2rem;">
-  <h1>✅ Compra Confirmada!</h1>
-  <p><strong>Pedido:</strong> <span id="pedido"></span></p>
-  <p><strong>Nome:</strong> <span id="nome"></span></p>
-  <p><strong>Valor:</strong> R$<span id="valor"></span></p>
-  <canvas id="qr" style="margin-top:20px;"></canvas>
+<body>
+  <div class="container">
+    <h1>Ingressos Gerados</h1>
+    <div class="dados" id="info"></div>
+    <div id="listaIngressos"></div>
+    <button onclick="enviarWhats()">Enviar por WhatsApp</button>
+  </div>
 
   <script>
-    const dados = JSON.parse(localStorage.getItem("ingressoFinal"));
-    if (dados) {
-      document.getElementById("pedido").textContent = dados.pedido;
-      document.getElementById("nome").textContent = dados.nome;
-      document.getElementById("valor").textContent = dados.valor.toFixed(2);
-      new QRious({
-        element: document.getElementById("qr"),
-        value: `Pedido: ${dados.pedido}\nNome: ${dados.nome}\nValor: R$${dados.valor}`,
-        size: 200
+    const ingresso = JSON.parse(localStorage.getItem("ingressoFinal"));
+    const div = document.getElementById("info");
+    const lista = document.getElementById("listaIngressos");
+
+    if (ingresso) {
+      div.innerHTML = `
+        <p><strong>Evento:</strong> ${ingresso.evento.nome}</p>
+        <p><strong>Pedido:</strong> ${ingresso.pedido}</p>
+        <p><strong>CPF:</strong> ${ingresso.cpf}</p>
+        <p><strong>WhatsApp:</strong> ${ingresso.whats}</p>
+        <p><strong>Total:</strong> R$ ${ingresso.valor.toFixed(2)}</p>
+      `;
+
+      ingresso.ingressos.forEach((pessoa, index) => {
+        const idDiv = `ingresso-${index}`;
+        const canvasId = `qrcode${index}`;
+
+        const ingressoDiv = document.createElement("div");
+        ingressoDiv.className = "ingresso";
+        ingressoDiv.id = idDiv;
+        ingressoDiv.innerHTML = `
+          <img class="logo-arretados" src="logo-arretados.jpg" alt="Logo Arretados" />
+          <p class="realizacao">Realização: Arretados Produções</p>
+          <p><strong>Nome:</strong> ${pessoa.nome}</p>
+          <p><strong>Gênero:</strong> ${pessoa.genero}</p>
+          <p><strong>Pedido:</strong> ${ingresso.pedido}</p>
+          <p><strong>Evento:</strong> ${ingresso.evento.nome}</p>
+          <div class="qr-code"><canvas id="${canvasId}"></canvas></div>
+          <button class="salvar" onclick="salvarImagem('${idDiv}')">Salvar ingresso como imagem</button>
+        `;
+
+        lista.appendChild(ingressoDiv);
+
+        new QRious({
+          element: document.getElementById(canvasId),
+          value: `Evento: ${ingresso.evento.nome}\nPedido: ${ingresso.pedido}\nNome: ${pessoa.nome}\nGênero: ${pessoa.genero}\nCPF: ${ingresso.cpf}`,
+          size: 160
+        });
       });
-    } else {
-      document.body.innerHTML = '<p>Dados não encontrados.</p>';
+    }
+
+    function salvarImagem(id) {
+      const el = document.getElementById(id);
+      html2canvas(el).then(canvas => {
+        const link = document.createElement("a");
+        link.download = id + ".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+    }
+
+    function enviarWhats() {
+      const numero = "5543991289991";
+      const texto = `Olá! Acabei de pagar ${ingresso.ingressos.length} ingresso(s) para o evento "${ingresso.evento.nome}"\nPedido: ${ingresso.pedido}\nCPF: ${ingresso.cpf}`;
+      window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, "_blank");
     }
   </script>
 </body>

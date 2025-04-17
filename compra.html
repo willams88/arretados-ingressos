@@ -68,7 +68,7 @@
           <p><strong>Local:</strong> ${evento.local}</p>
           <p><strong>Valores:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>
         </div>
-        <img src="${evento.logo}" alt="Logo do evento" class="evento-logo" style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover;">
+        <img src="${evento.logo}" alt="Logo do evento" class="evento-logo" style="width: 200px; height: 150px; border-radius: 12px; object-fit: cover; margin-right: 20px;">
       </div>
     `;
 
@@ -163,6 +163,11 @@
       };
 
       localStorage.setItem("ingressoFinal", JSON.stringify(dados));
+
+      const historico = JSON.parse(localStorage.getItem("historicoPedidos") || "[]");
+      historico.push(dados);
+      localStorage.setItem("historicoPedidos", JSON.stringify(historico));
+
       window.location.href = "pagamento.html";
     }
 

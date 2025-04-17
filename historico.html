@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Histórico de Pedidos</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fff8e1; padding: 2rem; }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 { text-align: center; color: #ff9800; }
+    .pedido {
+      border-bottom: 1px solid #ddd;
+      padding: 1rem 0;
+    }
+    .pedido:last-child {
+      border-bottom: none;
+    }
+    .pedido p {
+      margin: 0.3rem 0;
+    }
+    button {
+      margin-top: 0.5rem;
+      padding: 0.4rem 1rem;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Histórico de Pedidos</h1>
+    <div id="listaPedidos"></div>
+  </div>
+
+  <script>
+    const listaDiv = document.getElementById("listaPedidos");
+    const historico = JSON.parse(localStorage.getItem("historicoPedidos") || "[]");
+
+    if (historico.length === 0) {
+      listaDiv.innerHTML = "<p>Nenhum pedido encontrado.</p>";
+    } else {
+      historico.forEach((pedido, index) => {
+        const div = document.createElement("div");
+        div.className = "pedido";
+        div.innerHTML = `
+          <p><strong>Evento:</strong> ${pedido.evento.nome}</p>
+          <p><strong>Pedido:</strong> ${pedido.pedido}</p>
+          <p><strong>CPF:</strong> ${pedido.cpf}</p>
+          <p><strong>Total:</strong> R$ ${pedido.valor.toFixed(2)}</p>
+          <button onclick="ver(${index})">Ver detalhes</button>
+        `;
+        listaDiv.appendChild(div);
+      });
+    }
+
+    function ver(index) {
+      const historico = JSON.parse(localStorage.getItem("historicoPedidos") || "[]");
+      const pedido = historico[index];
+      localStorage.setItem("ingressoFinal", JSON.stringify(pedido));
+      window.location.href = "confirmacao.html";
+    }
+  </script>
+</body>
+</html>

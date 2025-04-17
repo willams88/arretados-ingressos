@@ -2,57 +2,125 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Arretados Ingressos</title>
+  <title>Painel de Eventos - Arretados Ingressos</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #fff8e1; margin: 0; padding: 0; }
-    header { text-align: center; padding: 1rem; }
-    header img { max-width: 300px; height: auto; margin: 0 auto; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff8e1;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #ff9800;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+    }
     .eventos {
-      display: flex; flex-wrap: wrap; gap: 1rem;
-      padding: 1rem; justify-content: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      padding: 1rem;
     }
     .card {
-      background: white; border-radius: 10px;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-      padding: 1rem; width: 260px; cursor: pointer;
-      transition: transform 0.2s;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .card:hover { transform: scale(1.03); }
-    .card h3 { margin: 0 0 0.5rem 0; color: #d84315; }
-    .card p { margin: 0.3rem 0; }
+    .card img {
+      width: 200px;
+      height: 150px;
+      border-radius: 12px;
+      object-fit: cover;
+      margin-bottom: 1rem;
+    }
+    .card h3 {
+      margin: 0.5rem 0 0.2rem;
+      color: #d84315;
+      text-align: center;
+    }
+    .card p {
+      margin: 0.3rem 0;
+      text-align: center;
+    }
+    .card button {
+      margin-top: 1rem;
+      padding: 0.6rem 1rem;
+      background: #ff9800;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
   </style>
+
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+
 </head>
 <body>
-  <header>
-    <img src="logo-tardizinha.jpg" alt="Logo Tardizinha dos Arretados">
-  </header>
-
+  <header>Arretados Ingressos</header>
   <div class="eventos" id="listaEventos"></div>
 
   <script>
     const eventos = [
-      { nome: "Tardizinha dos Arretados", data: "25/05/2025", local: "AABB de Rolândia", masculino: 35, feminino: 30 },
-      { nome: "Arrasta Pé do Sertão", data: "15/06/2025", local: "Parque São João", masculino: 40, feminino: 35 },
-      { nome: "Noite do Camaleão", data: "05/07/2025", local: "Clube Arretado", masculino: 50, feminino: 40 }
+      {
+        nome: "Tardizinha dos Arretados",
+        data: "25/05/2025",
+        local: "AABB de Rolândia",
+        masculino: 35,
+        feminino: 30,
+        logo: "logo-tardizinha.jpg"
+      },
+      {
+        nome: "Arrasta Pé do Sertão",
+        data: "15/06/2025",
+        local: "Parque São João",
+        masculino: 40,
+        feminino: 35,
+        logo: "logo-arrasta.jpg"
+      },
+      {
+        nome: "Noite do Camaleão",
+        data: "05/07/2025",
+        local: "Clube Arretado",
+        masculino: 50,
+        feminino: 40,
+        logo: "logo-camaleao.jpg"
+      }
     ];
 
-    const lista = document.getElementById("listaEventos");
+    const container = document.getElementById("listaEventos");
 
-    eventos.forEach(ev => {
+    eventos.forEach(evento => {
       const card = document.createElement("div");
       card.className = "card";
-      card.onclick = () => {
-        localStorage.setItem("eventoSelecionado", JSON.stringify(ev));
-        window.location.href = "compra.html";
-      };
       card.innerHTML = `
-        <h3>${ev.nome}</h3>
-        <p><strong>Data:</strong> ${ev.data}</p>
-        <p><strong>Local:</strong> ${ev.local}</p>
-        <p><strong>Ingressos:</strong> M R$${ev.masculino} | F R$${ev.feminino}</p>
+        <img src="${evento.logo}" alt="Logo do evento">
+        <h3>${evento.nome}</h3>
+        <p><strong>Data:</strong> ${evento.data}</p>
+        <p><strong>Local:</strong> ${evento.local}</p>
+        <p><strong>Valores:</strong> M R$${evento.masculino} | F R$${evento.feminino}</p>
+        <button onclick='selecionarEvento(${JSON.stringify(evento)})'>Comprar Ingresso</button>
       `;
-      lista.appendChild(card);
+      container.appendChild(card);
     });
+
+    function selecionarEvento(evento) {
+      localStorage.setItem("eventoSelecionado", JSON.stringify(evento));
+      window.location.href = "compra.html";
+    }
   </script>
 </body>
 </html>

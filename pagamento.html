@@ -2,82 +2,61 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Pagamento</title>
+  <title>Pagamento via Pix</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #fff8e1;
+    body { font-family: Arial, sans-serif; background: #fff8e1; padding: 2rem; text-align: center; }
+    .pix-container {
+      background: white;
       padding: 2rem;
-      text-align: center;
-    }
-    .card {
-      background: #fff3e0;
-      padding: 2rem;
+      border-radius: 12px;
       max-width: 500px;
       margin: auto;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .pix {
-      margin: 1rem 0;
-      font-weight: bold;
-      font-size: 1.1rem;
-      color: #ff6f00;
+    .pix-container h2 { color: #d84315; }
+    .chave-pix {
+      font-size: 1.2rem;
+      background: #ffe0b2;
+      padding: 0.8rem;
+      border-radius: 10px;
+      margin: 1rem auto;
+      width: fit-content;
     }
     button {
-      padding: 0.7rem 1.5rem;
+      margin: 1rem auto;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
       border: none;
       border-radius: 10px;
       background: #ff9800;
       color: white;
-      font-size: 1rem;
       cursor: pointer;
-      margin: 10px 0;
-    }
-    canvas {
-      margin-top: 1rem;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 </head>
 <body>
-  <div class="card">
+  <div class="pix-container">
     <h2>Pagamento via Pix</h2>
-    <p>Chave Pix:</p>
-    <div class="pix" id="chavePix">12635899444</div>
+    <div class="chave-pix" id="chave">12635899444</div>
     <button onclick="copiarPix()">Copiar chave Pix</button>
-
-    <canvas id="qrcode" width="200" height="200"></canvas>
-
-    <br><br>
-    <button onclick="enviarWhats()">Já paguei</button>
+    <canvas id="qrcode" style="margin: 2rem auto;"></canvas>
+    <br />
+    <button onclick="window.location.href='confirmacao.html'">Já paguei</button>
   </div>
 
   <script>
-    const dados = JSON.parse(localStorage.getItem("ingressoFinal"));
-    if (!dados) {
-      alert("Dados não encontrados!");
-      window.location.href = "index.html";
-    }
-
+    const chavePix = "12635899444";
     const qr = new QRious({
       element: document.getElementById("qrcode"),
-      value: "pix:12635899444\nValor: R$" + dados.valor + "\nNome: " + dados.nome,
-      size: 200
+      size: 200,
+      value: chavePix
     });
 
     function copiarPix() {
-      navigator.clipboard.writeText("12635899444");
-      alert("Chave Pix copiada com sucesso!");
-    }
-
-    function enviarWhats() {
-      const nome = encodeURIComponent(dados.nome);
-      const pedido = encodeURIComponent(dados.pedido);
-      const valor = encodeURIComponent("R$" + dados.valor);
-      const evento = encodeURIComponent(dados.evento.nome);
-      const msg = "Olá, acabei de fazer o pagamento do ingresso!%0A%0ANome: " + nome + "%0APedido: " + pedido + "%0AEvento: " + evento + "%0AValor: " + valor + "%0A%0APode validar pra mim?";
-      window.location.href = "https://wa.me/+5543991289991?text=" + msg;
+      navigator.clipboard.writeText(chavePix).then(() => {
+        alert("Chave Pix copiada com sucesso!");
+      });
     }
   </script>
 </body>
