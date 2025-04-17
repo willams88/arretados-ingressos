@@ -4,99 +4,37 @@
   <meta charset="UTF-8" />
   <title>Confirmação</title>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 2rem;
-      background-color: #fffefc;
-    }
-    .ingresso {
-      border: 2px dashed #ff9800;
-      padding: 1rem;
-      margin-bottom: 2rem;
-      border-radius: 12px;
-      background: #fff8e1;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-    }
-    h2 {
-      color: #d84315;
-    }
-    canvas {
-      margin-top: 1rem;
-    }
-    .info strong {
-      color: #333;
-    }
-    .whats {
-      text-align: center;
-      margin-top: 2rem;
-    }
-    .whats button {
-      background-color: #25d366;
-      color: white;
-      border: none;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-  </style>
 </head>
 <body>
-  <h1 style="text-align:center;">✅ Ingressos Gerados</h1>
-  <div id="listaIngressos"></div>
-  <div class="whats">
-    <button onclick="enviarWhats()">Enviar ingressos via WhatsApp</button>
-  </div>
+  <h1>Ingressos Gerados!</h1>
+  <div id="conteudo"></div>
+  <button onclick="enviarWhats()">Enviar por WhatsApp</button>
 
   <script>
-    const ingressos = JSON.parse(localStorage.getItem("ingressosGerados"));
-    const container = document.getElementById("listaIngressos");
+    const ingresso = JSON.parse(localStorage.getItem("ingressoFinal"));
+    const div = document.getElementById("conteudo");
 
-    if (!ingressos || ingressos.length === 0) {
-      container.innerHTML = "<p>Dados não encontrados.</p>";
-    } else {
-      ingressos.forEach((ingresso, i) => {
-        const div = document.createElement("div");
-        div.className = "ingresso";
+    if (ingresso) {
+      div.innerHTML = `
+        <p><strong>Pedido:</strong> ${ingresso.pedido}</p>
+        <p><strong>Gênero:</strong> ${ingresso.genero}</p>
+        <p><strong>CPF:</strong> ${ingresso.cpf}</p>
+        <p><strong>Valor:</strong> R$ ${ingresso.valor.toFixed(2)}</p>
+      `;
 
-        const canvas = document.createElement("canvas");
-        const qr = new QRious({
-          element: canvas,
-          value: `Pedido: ${ingresso.pedido}\\nNome: ${ingresso.nome}\\nGênero: ${ingresso.genero}\\nCPF: ${ingresso.cpf}`,
-          size: 200
-        });
-
-        div.innerHTML = `
-          <h2>Ingresso #${i + 1}</h2>
-          <p class="info"><strong>Nome:</strong> ${ingresso.nome}</p>
-          <p class="info"><strong>Gênero:</strong> ${ingresso.genero.charAt(0).toUpperCase() + ingresso.genero.slice(1)}</p>
-          <p class="info"><strong>Evento:</strong> ${ingresso.evento.nome}</p>
-          <p class="info"><strong>Pedido:</strong> ${ingresso.pedido}</p>
-          <p class="info"><strong>Valor:</strong> R$ ${ingresso.valor.toFixed(2)}</p>
-        `;
-
-        div.appendChild(canvas);
-        container.appendChild(div);
+      const canvas = document.createElement("canvas");
+      new QRious({
+        element: canvas,
+        value: "Pedido: " + ingresso.pedido + "\\nCPF: " + ingresso.cpf,
+        size: 200
       });
+      div.appendChild(canvas);
     }
 
     function enviarWhats() {
-      const numero = "+5543991289991";
-      let texto = "Olá, acabei de gerar os ingressos:%0A";
-      let total = 0;
-
-      ingressos.forEach((ingresso, i) => {
-        texto += `%0AIngresso ${i + 1}:%0ANome: ${ingresso.nome}%0AGênero: ${ingresso.genero}%0APedido: ${ingresso.pedido}%0AValor: R$${ingresso.valor}%0A`;
-        total += ingresso.valor;
-      });
-
-      texto += `%0ATotal: R$${total.toFixed(2)}`;
-      const link = `https://wa.me/${numero}?text=${texto}`;
-      window.open(link, "_blank");
+      const numero = "5543991289991";
+      const texto = `Olá, comprei ingresso do Arretados:%0APedido: ${ingresso.pedido}%0ACPF: ${ingresso.cpf}%0AGênero: ${ingresso.genero}%0AValor: R$ ${ingresso.valor}`;
+      window.open(`https://wa.me/${numero}?text=${texto}`, "_blank");
     }
   </script>
 </body>
