@@ -2,19 +2,67 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Ingresso Confirmado</title>
+  <title>Confirmação do Ingresso</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <style>
-    body { font-family: Arial; background: #fff8e1; padding: 2rem; text-align: center; }
-    h2 { color: green; }
-    .ingresso {
-      background: white; padding: 1.5rem; border-radius: 12px;
-      margin: 1rem auto; max-width: 500px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-      text-align: left;
+    body {
+      font-family: Arial, sans-serif;
+      background: #fffef0;
+      padding: 2rem;
+      text-align: center;
     }
-    .qr { text-align: center; margin: 1rem 0; }
-    .logo { width: 100px; float: right; margin-left: 1rem; }
-    .sec { font-weight: bold; font-size: 1.1rem; text-align: center; }
+    h2 {
+      color: #2ecc71;
+    }
+    .ingresso {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin: 1rem auto;
+      max-width: 400px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .logo-evento {
+      width: 150px;
+      height: auto;
+      display: block;
+      margin: 0 auto 0.5rem auto;
+    }
+    .realizacao {
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      color: #333;
+    }
+    .info {
+      text-align: left;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+    .qr {
+      text-align: center;
+      margin: 1rem 0;
+    }
+    .status {
+      font-weight: bold;
+      font-size: 1rem;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+    .pendente {
+      color: red;
+    }
+    .validado {
+      color: green;
+    }
+    .codigo {
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -22,50 +70,56 @@
   <div id="listaIngressos"></div>
 
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCgFN0lCf0xeJaLnWkTfjAbvDBwQXxXe0A",
+      authDomain: "arretados-ingressos-app.firebaseapp.com",
+      projectId: "arretados-ingressos-app",
+      storageBucket: "arretados-ingressos-app.firebasestorage.app",
+      messagingSenderId: "309467408671",
+      appId: "1:309467408671:web:d4be567df9b4d39a1e282a"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const ingresso = JSON.parse(localStorage.getItem("ingressoFinal")) || {};
     const lista = document.getElementById("listaIngressos");
+    const nomes = ingresso.nomes || [ingresso.nome];
 
-    const nomes = ingresso.nomes || [ingresso.nome]; // caso seja 1 ingresso
     nomes.forEach((nome, index) => {
+      const id = ingresso.pedido + "-" + index;
       const genero = ingresso.generos ? ingresso.generos[index] : ingresso.genero;
       const codigoSeguranca = Math.floor(100000 + Math.random() * 900000);
-      const qrCode = encodeURIComponent(
-        "Evento: " + ingresso.evento.nome +
-        "\nNome: " + nome +
-        "\nCPF: " + ingresso.cpf +
-        "\nPedido: " + ingresso.pedido +
-        "\nGênero: " + genero +
-        "\nCódigo: " + codigoSeguranca
-      );
+      const qrCode = encodeURIComponent("Evento: " + ingresso.evento.nome + "\nNome: " + nome + "\nCPF: " + ingresso.cpf + "\nPedido: " + ingresso.pedido + "\nGênero: " + genero + "\nCódigo: " + codigoSeguranca);
 
-      lista.innerHTML += `
-        <div class="ingresso">
-          <img src="\${ingresso.evento.logo}" class="logo" alt="Logo do evento">
-          <strong>Evento:</strong> \${ingresso.evento.nome}<br>
-          <strong>Data:</strong> \${ingresso.evento.data}<br>
-          <strong>Local:</strong> \${ingresso.evento.local}<br><br>
+      const div = document.createElement("div");
+      div.className = "ingresso";
+      div.innerHTML = `
+        <img src="\${ingresso.evento.logo}" class="logo-evento">
+        <div class="realizacao">Realização: Arretados Produções</div>
+        <div class="info">
           <strong>Nome:</strong> \${nome}<br>
           <strong>Gênero:</strong> \${genero}<br>
-          <strong>CPF:</strong> \${ingresso.cpf}<br>
           <strong>Pedido:</strong> \${ingresso.pedido}<br>
-          <div class="qr">
-            <img src="https://chart.googleapis.com/chart?cht=qr&chs=180x180&chl=\${qrCode}">
-          </div>
-          
-          <div style="text-align:center; font-size:1rem; margin-top: 0.5rem; color: red; font-weight: bold;">
-            ⚠️ Ingresso PENDENTE de validação
-          </div>
-          <div style="text-align:center; font-size:0.85rem; color: #555;">
-            Este ingresso só será considerado válido após a confirmação do organizador.
-          </div>
-
-          <div class="sec">Cód. Segurança: \${codigoSeguranca}</div>
-          <div style="text-align:center; margin-top: 0.8rem;">
-            <img src="https://arretados.vercel.app/logo-arretados.png" width="80"><br>
-            <small>Realização: Arretados Produções</small>
-          </div>
+          <strong>Evento:</strong> \${ingresso.evento.nome}<br>
+        </div>
+        <div class="status pendente" id="status-\${id}">⚠️ Ingresso PENDENTE de validação</div>
+        <div class="codigo">Cód. Segurança: \${codigoSeguranca}</div>
+        <div class="qr">
+          <img src="https://chart.googleapis.com/chart?cht=qr&chs=180x180&chl=\${qrCode}">
         </div>
       `;
+      lista.appendChild(div);
+
+      // Consultar validação
+      db.collection("validacoes").doc(id).get().then(doc => {
+        if (doc.exists && doc.data().validado === true) {
+          const statusEl = document.getElementById("status-" + id);
+          statusEl.textContent = "✅ Ingresso VALIDADO";
+          statusEl.classList.remove("pendente");
+          statusEl.classList.add("validado");
+        }
+      });
     });
   </script>
 </body>
