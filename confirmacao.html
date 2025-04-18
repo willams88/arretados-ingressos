@@ -1,196 +1,72 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <title>Confirmação do Pedido</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Ingresso Confirmado</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #fffefc; padding: 2rem; }
-    .container {
-      background: white;
-      max-width: 800px;
-      margin: auto;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    h1 { color: #4caf50; }
-    .dados { text-align: left; margin-top: 1.5rem; }
-    .dados p { margin: 0.3rem 0; }
+    body { font-family: Arial; background: #fff8e1; padding: 2rem; text-align: center; }
+    h2 { color: green; }
     .ingresso {
-      border-top: 1px solid #ccc;
-      padding: 1rem 0;
-      margin-top: 1rem;
-      position: relative;
+      background: white; padding: 1.5rem; border-radius: 12px;
+      margin: 1rem auto; max-width: 500px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      text-align: left;
     }
-    .qr-code {
-      margin-top: 1rem;
-    }
-    .logo-arretados {
-      margin-top: 1rem;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-    }
-    .realizacao {
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-      font-weight: bold;
-      color: #444;
-    }
-    button {
-      margin-top: 1rem;
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      background: #25d366;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .salvar {
-      background: #2196f3;
-      margin-top: 0.5rem;
-    }
+    .qr { text-align: center; margin: 1rem 0; }
+    .logo { width: 100px; float: right; margin-left: 1rem; }
+    .sec { font-weight: bold; font-size: 1.1rem; text-align: center; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Ingressos Gerados</h1>
-    <div id="contagem" style="font-size:1.1rem; color:#ff5722; margin-top:0.5rem;"></div>
-    <div class="dados" id="info"></div>
-    <div id="listaIngressos"></div>
-    
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <button onclick="gerarPDF()" style="margin-top: 1rem; background:#673ab7;">📄 Gerar PDF com Ingressos</button>
-  <script>
-    function gerarPDF() {
-      const area = document.getElementById("listaIngressos");
-      const opt = {
-        margin: 0.5,
-        filename: 'meus-ingressos.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(area).save();
-    }
-  </script>
-
-    <button onclick="enviarWhats()">Enviar por WhatsApp</button>
-  </div>
+  <h2>✅ Ingressos Gerados</h2>
+  <div id="listaIngressos"></div>
 
   <script>
-    const ingresso = JSON.parse(localStorage.getItem("ingressoFinal"));
-    const div = document.getElementById("info");
+    const ingresso = JSON.parse(localStorage.getItem("ingressoFinal")) || {};
     const lista = document.getElementById("listaIngressos");
 
-    if (ingresso) {
-      
-    const dataEvento = new Date(ingresso.evento.data.split("/").reverse().join("-") + "T00:00:00");
-    const hoje = new Date();
-    const diasRestantes = Math.ceil((dataEvento - hoje) / (1000 * 60 * 60 * 24));
-    const texto = diasRestantes > 0
-      ? `⏳ Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} para o evento!`
-      : diasRestantes === 0
-      ? "🎉 É hoje o evento!"
-      : "✅ Evento já aconteceu.";
-    document.getElementById("contagem").textContent = texto;
+    const nomes = ingresso.nomes || [ingresso.nome]; // caso seja 1 ingresso
+    nomes.forEach((nome, index) => {
+      const genero = ingresso.generos ? ingresso.generos[index] : ingresso.genero;
+      const codigoSeguranca = Math.floor(100000 + Math.random() * 900000);
+      const qrCode = encodeURIComponent(
+        "Evento: " + ingresso.evento.nome +
+        "\nNome: " + nome +
+        "\nCPF: " + ingresso.cpf +
+        "\nPedido: " + ingresso.pedido +
+        "\nGênero: " + genero +
+        "\nCódigo: " + codigoSeguranca
+      );
 
-      div.innerHTML = `
-        <p><strong>Evento:</strong> ${ingresso.evento.nome}</p>
-        <p><strong>Pedido:</strong> ${ingresso.pedido}</p>
-        <p><strong>CPF do Comprador:</strong> ${ingresso.cpf}</p>
-        <p><strong>WhatsApp:</strong> ${ingresso.whats}</p>
-        <p><strong>Total:</strong> R$ ${ingresso.valor.toFixed(2)}</p>
+      lista.innerHTML += `
+        <div class="ingresso">
+          <img src="\${ingresso.evento.logo}" class="logo" alt="Logo do evento">
+          <strong>Evento:</strong> \${ingresso.evento.nome}<br>
+          <strong>Data:</strong> \${ingresso.evento.data}<br>
+          <strong>Local:</strong> \${ingresso.evento.local}<br><br>
+          <strong>Nome:</strong> \${nome}<br>
+          <strong>Gênero:</strong> \${genero}<br>
+          <strong>CPF:</strong> \${ingresso.cpf}<br>
+          <strong>Pedido:</strong> \${ingresso.pedido}<br>
+          <div class="qr">
+            <img src="https://chart.googleapis.com/chart?cht=qr&chs=180x180&chl=\${qrCode}">
+          </div>
+          
+          <div style="text-align:center; font-size:1rem; margin-top: 0.5rem; color: red; font-weight: bold;">
+            ⚠️ Ingresso PENDENTE de validação
+          </div>
+          <div style="text-align:center; font-size:0.85rem; color: #555;">
+            Este ingresso só será considerado válido após a confirmação do organizador.
+          </div>
+
+          <div class="sec">Cód. Segurança: \${codigoSeguranca}</div>
+          <div style="text-align:center; margin-top: 0.8rem;">
+            <img src="https://arretados.vercel.app/logo-arretados.png" width="80"><br>
+            <small>Realização: Arretados Produções</small>
+          </div>
+        </div>
       `;
-
-      ingresso.ingressos.forEach((pessoa, index) => {
-        const idDiv = `ingresso-${index}`;
-        const canvasId = `qrcode${index}`;
-
-        const ingressoDiv = document.createElement("div");
-        ingressoDiv.className = "ingresso";
-        ingressoDiv.id = idDiv;
-        ingressoDiv.innerHTML = `
-          <img class="logo-arretados" src="logo-arretados.jpg" alt="Logo Arretados" />
-          <p class="realizacao">Realização: Arretados Produções</p>
-          <p><strong>Nome:</strong> ${pessoa.nome}</p>
-          <p><strong>Gênero:</strong> ${pessoa.genero}</p>
-          <p><strong>Pedido:</strong> ${ingresso.pedido}</p>
-          <p><strong>Evento:</strong> ${ingresso.evento.nome}</p>
-          <p><strong>Código de Segurança:</strong> <span class="codigo" id="codigo-${index}"></span></p>
-          <div class="qr-code"><canvas id="${canvasId}"></canvas></div>
-          <button class="salvar" onclick="salvarImagem('${idDiv}')">Salvar ingresso como imagem</button>
-        `;
-
-        lista.appendChild(ingressoDiv);
-
-        new QRious({
-          element: document.getElementById(canvasId),
-          value: `Evento: ${ingresso.evento.nome}\nPedido: ${ingresso.pedido}\nNome: ${pessoa.nome}\nGênero: ${pessoa.genero}\nCPF: ${ingresso.cpf}`,
-          size: 160
-        });
-      });
-    }
-
-    
-    function gerarCodigo(tam) {
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ123456789";
-      return Array.from({length: tam}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
-    }
-
-    function salvarImagem(id) {
-
-      const el = document.getElementById(id);
-      html2canvas(el).then(canvas => {
-        const link = document.createElement("a");
-        link.download = id + ".png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      });
-    }
-
-    function enviarWhats() {
-      const numero = "5543991289991";
-      const texto = `Olá! Acabei de pagar ${ingresso.ingressos.length} ingresso(s) para o evento "${ingresso.evento.nome}"\nPedido: ${ingresso.pedido}\nCPF: ${ingresso.cpf}`;
-      window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, "_blank");
-    }
+    });
   </script>
-
-  <style id="tema-style"></style>
-  <button onclick="alternarTema()" style="position: fixed; top: 1rem; right: 1rem; background: #444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; z-index: 1000;">🌓 Tema</button>
-  <script>
-    const temas = {
-      claro: `
-        body { background: #fff8e1; color: #000; }
-        .container, .card, .pedido, .pessoa, .ingresso { background: white; color: #000; }
-        header { background: #ff9800; color: white; }
-        button { background: #ff9800; color: white; }
-      `,
-      escuro: `
-        body { background: #121212; color: #eee; }
-        .container, .card, .pedido, .pessoa, .ingresso { background: #1e1e1e; color: #eee; }
-        header { background: #333; color: #ff9800; }
-        button { background: #555; color: white; }
-      `
-    };
-
-    function aplicarTema(tema) {
-      document.getElementById("tema-style").innerHTML = temas[tema];
-      localStorage.setItem("temaPreferido", tema);
-    }
-
-    function alternarTema() {
-      const atual = localStorage.getItem("temaPreferido") || "claro";
-      const proximo = atual === "claro" ? "escuro" : "claro";
-      aplicarTema(proximo);
-    }
-
-    aplicarTema(localStorage.getItem("temaPreferido") || "claro");
-  </script>
-
 </body>
 </html>
