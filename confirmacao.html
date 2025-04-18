@@ -1,196 +1,138 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <title>Confirmação do Pedido</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Ingressos Gerados</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #fffefc; padding: 2rem; }
-    .container {
-      background: white;
-      max-width: 800px;
-      margin: auto;
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fffde6;
+      margin: 0;
       padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       text-align: center;
     }
-    h1 { color: #4caf50; }
-    .dados { text-align: left; margin-top: 1.5rem; }
-    .dados p { margin: 0.3rem 0; }
+    h2 {
+      color: green;
+    }
+    .contador {
+      color: #e53935;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .box {
+      background: white;
+      padding: 2rem;
+      margin: auto;
+      max-width: 600px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
     .ingresso {
+      margin-top: 2rem;
       border-top: 1px solid #ccc;
-      padding: 1rem 0;
-      margin-top: 1rem;
-      position: relative;
+      padding-top: 1.5rem;
     }
-    .qr-code {
-      margin-top: 1rem;
+    .logo {
+      width: 100px;
+      margin: 1rem 0;
     }
-    .logo-arretados {
-      margin-top: 1rem;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+    .info {
+      margin: 0.5rem 0;
+      text-align: left;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .info strong {
+      display: inline-block;
+      width: 140px;
+    }
+    .qr img {
+      width: 200px;
+      height: 200px;
+    }
+    .btns {
+      margin-top: 1.5rem;
+    }
+    .btn {
+      padding: 10px 20px;
+      margin: 0.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+    }
+    .btn-blue {
+      background-color: #2196F3;
+    }
+    .btn-purple {
+      background-color: #6a1b9a;
+    }
+    .btn-orange {
+      background-color: #f57c00;
     }
     .realizacao {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       margin-top: 0.5rem;
+    }
+    .validacao {
       font-weight: bold;
-      color: #444;
+      margin: 1rem 0;
     }
-    button {
-      margin-top: 1rem;
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      background: #25d366;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+    .pendente {
+      color: red;
     }
-    .salvar {
-      background: #2196f3;
-      margin-top: 0.5rem;
+    .validado {
+      color: green;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Ingressos Gerados</h1>
-    <div id="contagem" style="font-size:1.1rem; color:#ff5722; margin-top:0.5rem;"></div>
-    <div class="dados" id="info"></div>
-    <div id="listaIngressos"></div>
-    
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <button onclick="gerarPDF()" style="margin-top: 1rem; background:#673ab7;">📄 Gerar PDF com Ingressos</button>
-  <script>
-    function gerarPDF() {
-      const area = document.getElementById("listaIngressos");
-      const opt = {
-        margin: 0.5,
-        filename: 'meus-ingressos.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(area).save();
-    }
-  </script>
+  <h2>✅ Ingressos Gerados</h2>
+  <div class="contador">⏳ Faltam <span id="dias">0</span> dias para o evento!</div>
 
-    <button onclick="enviarWhats()">Enviar por WhatsApp</button>
+  <div class="box">
+    <div class="info" style="text-align:left;">
+      <strong>Evento:</strong> Tardizinha dos Arretados<br>
+      <strong>Pedido:</strong> 140916<br>
+      <strong>CPF do Comprador:</strong> 12635899444<br>
+      <strong>WhatsApp:</strong> 43993289991<br>
+      <strong>Total:</strong> R$ 30.00
+    </div>
+
+    <div class="ingresso">
+      <img src="https://arretados-ingressos.vercel.app/logo-arretados.png" class="logo"><br>
+      <div class="realizacao">Realização: Arretados Produções</div>
+      <div class="info">
+        <strong>Nome:</strong> ana<br>
+        <strong>Gênero:</strong> feminino<br>
+        <strong>Pedido:</strong> 140916<br>
+        <strong>Evento:</strong> Tardizinha dos Arretados<br>
+        <strong>Código de Segurança:</strong> 567812
+      </div>
+
+      <div class="validacao pendente">
+        ⚠️ Ingresso PENDENTE de validação<br>
+        <small>Este ingresso só será considerado válido após a confirmação do organizador.</small>
+      </div>
+
+      <div class="qr">
+        <img src="https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=Ingresso%20ana%20-%20pedido%20140916">
+      </div>
+
+      <div class="btns">
+        <button class="btn btn-blue">Salvar ingresso como imagem</button><br>
+        <button class="btn btn-purple">📄 Gerar PDF com Ingressos</button>
+        <button class="btn btn-orange">Enviar por WhatsApp</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    const ingresso = JSON.parse(localStorage.getItem("ingressoFinal"));
-    const div = document.getElementById("info");
-    const lista = document.getElementById("listaIngressos");
-
-    if (ingresso) {
-      
-    const dataEvento = new Date(ingresso.evento.data.split("/").reverse().join("-") + "T00:00:00");
+    const dataEvento = new Date("2025-05-25");
     const hoje = new Date();
-    const diasRestantes = Math.ceil((dataEvento - hoje) / (1000 * 60 * 60 * 24));
-    const texto = diasRestantes > 0
-      ? `⏳ Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} para o evento!`
-      : diasRestantes === 0
-      ? "🎉 É hoje o evento!"
-      : "✅ Evento já aconteceu.";
-    document.getElementById("contagem").textContent = texto;
-
-      div.innerHTML = `
-        <p><strong>Evento:</strong> ${ingresso.evento.nome}</p>
-        <p><strong>Pedido:</strong> ${ingresso.pedido}</p>
-        <p><strong>CPF do Comprador:</strong> ${ingresso.cpf}</p>
-        <p><strong>WhatsApp:</strong> ${ingresso.whats}</p>
-        <p><strong>Total:</strong> R$ ${ingresso.valor.toFixed(2)}</p>
-      `;
-
-      ingresso.ingressos.forEach((pessoa, index) => {
-        const idDiv = `ingresso-${index}`;
-        const canvasId = `qrcode${index}`;
-
-        const ingressoDiv = document.createElement("div");
-        ingressoDiv.className = "ingresso";
-        ingressoDiv.id = idDiv;
-        ingressoDiv.innerHTML = `
-          <img class="logo-arretados" src="logo-arretados.jpg" alt="Logo Arretados" />
-          <p class="realizacao">Realização: Arretados Produções</p>
-          <p><strong>Nome:</strong> ${pessoa.nome}</p>
-          <p><strong>Gênero:</strong> ${pessoa.genero}</p>
-          <p><strong>Pedido:</strong> ${ingresso.pedido}</p>
-          <p><strong>Evento:</strong> ${ingresso.evento.nome}</p>
-          <p><strong>Código de Segurança:</strong> <span class="codigo" id="codigo-${index}"></span></p>
-          <div class="qr-code"><canvas id="${canvasId}"></canvas></div>
-          <button class="salvar" onclick="salvarImagem('${idDiv}')">Salvar ingresso como imagem</button>
-        `;
-
-        lista.appendChild(ingressoDiv);
-
-        new QRious({
-          element: document.getElementById(canvasId),
-          value: `Evento: ${ingresso.evento.nome}\nPedido: ${ingresso.pedido}\nNome: ${pessoa.nome}\nGênero: ${pessoa.genero}\nCPF: ${ingresso.cpf}`,
-          size: 160
-        });
-      });
-    }
-
-    
-    function gerarCodigo(tam) {
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ123456789";
-      return Array.from({length: tam}, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
-    }
-
-    function salvarImagem(id) {
-
-      const el = document.getElementById(id);
-      html2canvas(el).then(canvas => {
-        const link = document.createElement("a");
-        link.download = id + ".png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      });
-    }
-
-    function enviarWhats() {
-      const numero = "5543991289991";
-      const texto = `Olá! Acabei de pagar ${ingresso.ingressos.length} ingresso(s) para o evento "${ingresso.evento.nome}"\nPedido: ${ingresso.pedido}\nCPF: ${ingresso.cpf}`;
-      window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, "_blank");
-    }
+    const diff = Math.ceil((dataEvento - hoje) / (1000 * 60 * 60 * 24));
+    document.getElementById("dias").textContent = diff;
   </script>
-
-  <style id="tema-style"></style>
-  <button onclick="alternarTema()" style="position: fixed; top: 1rem; right: 1rem; background: #444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; z-index: 1000;">🌓 Tema</button>
-  <script>
-    const temas = {
-      claro: `
-        body { background: #fff8e1; color: #000; }
-        .container, .card, .pedido, .pessoa, .ingresso { background: white; color: #000; }
-        header { background: #ff9800; color: white; }
-        button { background: #ff9800; color: white; }
-      `,
-      escuro: `
-        body { background: #121212; color: #eee; }
-        .container, .card, .pedido, .pessoa, .ingresso { background: #1e1e1e; color: #eee; }
-        header { background: #333; color: #ff9800; }
-        button { background: #555; color: white; }
-      `
-    };
-
-    function aplicarTema(tema) {
-      document.getElementById("tema-style").innerHTML = temas[tema];
-      localStorage.setItem("temaPreferido", tema);
-    }
-
-    function alternarTema() {
-      const atual = localStorage.getItem("temaPreferido") || "claro";
-      const proximo = atual === "claro" ? "escuro" : "claro";
-      aplicarTema(proximo);
-    }
-
-    aplicarTema(localStorage.getItem("temaPreferido") || "claro");
-  </script>
-
 </body>
 </html>
