@@ -1,138 +1,149 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Ingressos Gerados</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ingresso Gerado</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #fffde6;
+      background-color: #fff8e1;
+      color: #222;
       margin: 0;
-      padding: 2rem;
-      text-align: center;
+      padding: 0;
+      transition: background 0.3s;
     }
-    h2 {
-      color: green;
-    }
-    .contador {
-      color: #e53935;
-      font-size: 1rem;
-      margin-bottom: 1rem;
-    }
-    .box {
-      background: white;
-      padding: 2rem;
+
+    .container {
+      max-width: 700px;
       margin: auto;
-      max-width: 600px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      margin-top: 30px;
     }
-    .ingresso {
-      margin-top: 2rem;
-      border-top: 1px solid #ccc;
-      padding-top: 1.5rem;
+
+    .header {
+      text-align: center;
+      color: green;
+      font-size: 1.5rem;
     }
-    .logo {
-      width: 100px;
-      margin: 1rem 0;
+
+    .info-top {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
     }
-    .info {
-      margin: 0.5rem 0;
-      text-align: left;
-      font-size: 1rem;
-      line-height: 1.6;
-    }
-    .info strong {
+
+    .info-top strong {
       display: inline-block;
-      width: 140px;
+      width: 150px;
     }
-    .qr img {
-      width: 200px;
-      height: 200px;
+
+    .contagem {
+      text-align: center;
+      margin-top: 10px;
+      color: #e53935;
+      font-weight: bold;
     }
-    .btns {
-      margin-top: 1.5rem;
+
+    .card-ingresso {
+      text-align: center;
+      margin-top: 30px;
     }
+
+    .logo-evento {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      border-radius: 50%;
+      margin-bottom: 10px;
+    }
+
+    .qr {
+      margin: 20px 0;
+    }
+
     .btn {
       padding: 10px 20px;
-      margin: 0.5rem;
-      font-size: 1rem;
       border: none;
       border-radius: 6px;
+      font-size: 1rem;
+      margin: 5px;
       cursor: pointer;
+    }
+
+    .whatsapp {
+      background: #25d366;
       color: white;
     }
-    .btn-blue {
-      background-color: #2196F3;
+
+    .img-btn {
+      background: #2196f3;
+      color: white;
     }
-    .btn-purple {
-      background-color: #6a1b9a;
+
+    .pdf-btn {
+      background: #6a1b9a;
+      color: white;
     }
-    .btn-orange {
-      background-color: #f57c00;
-    }
+
     .realizacao {
-      font-size: 0.95rem;
-      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #444;
+      margin-top: 5px;
     }
-    .validacao {
-      font-weight: bold;
-      margin: 1rem 0;
+
+    .modo-escuro {
+      background-color: #121212;
+      color: white;
     }
-    .pendente {
-      color: red;
+
+    .modo-escuro .container {
+      background: #1e1e1e;
     }
-    .validado {
-      color: green;
+
+    .modo-escuro .info-top {
+      border-color: #444;
     }
   </style>
 </head>
 <body>
-  <h2>✅ Ingressos Gerados</h2>
-  <div class="contador">⏳ Faltam <span id="dias">0</span> dias para o evento!</div>
+  <div class="container">
+    <div class="header">✅ Ingressos Gerados</div>
+    <div class="contagem">⏳ Faltam 37 dias para o evento!</div>
 
-  <div class="box">
-    <div class="info" style="text-align:left;">
-      <strong>Evento:</strong> Tardizinha dos Arretados<br>
-      <strong>Pedido:</strong> 140916<br>
-      <strong>CPF do Comprador:</strong> 12635899444<br>
-      <strong>WhatsApp:</strong> 43993289991<br>
-      <strong>Total:</strong> R$ 30.00
+    <div class="info-top">
+      <div><strong>Evento:</strong> Tardizinha dos Arretados</div>
+      <div><strong>Pedido:</strong> 504852</div>
+      <div><strong>CPF do Comprador:</strong> 12635899444</div>
+      <div><strong>WhatsApp:</strong> 43993289991</div>
+      <div><strong>Total:</strong> R$ 30.00</div>
     </div>
 
-    <div class="ingresso">
-      <img src="https://arretados-ingressos.vercel.app/logo-arretados.png" class="logo"><br>
+    <div class="card-ingresso">
+      <img src="logo-arretados.png" alt="Logo" class="logo-evento" />
       <div class="realizacao">Realização: Arretados Produções</div>
-      <div class="info">
-        <strong>Nome:</strong> ana<br>
-        <strong>Gênero:</strong> feminino<br>
-        <strong>Pedido:</strong> 140916<br>
-        <strong>Evento:</strong> Tardizinha dos Arretados<br>
-        <strong>Código de Segurança:</strong> 567812
-      </div>
-
-      <div class="validacao pendente">
-        ⚠️ Ingresso PENDENTE de validação<br>
-        <small>Este ingresso só será considerado válido após a confirmação do organizador.</small>
-      </div>
-
+      <p><strong>Nome:</strong> ana</p>
+      <p><strong>Gênero:</strong> feminino</p>
+      <p><strong>Pedido:</strong> 504852</p>
+      <p><strong>Evento:</strong> Tardizinha dos Arretados</p>
+      <p><strong>Código de Segurança:</strong> <span id="cod-seg">743219</span></p>
       <div class="qr">
-        <img src="https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=Ingresso%20ana%20-%20pedido%20140916">
+        <canvas id="qr-code"></canvas>
       </div>
 
-      <div class="btns">
-        <button class="btn btn-blue">Salvar ingresso como imagem</button><br>
-        <button class="btn btn-purple">📄 Gerar PDF com Ingressos</button>
-        <button class="btn btn-orange">Enviar por WhatsApp</button>
-      </div>
+      <button class="btn img-btn" onclick="salvarComoImagem()">Salvar ingresso como imagem</button>
+      <button class="btn whatsapp" onclick="enviarWhatsapp()">Enviar por WhatsApp</button>
+      <br/>
+      <button class="btn pdf-btn">📄 Gerar PDF com Ingressos</button>
     </div>
   </div>
 
   <script>
-    const dataEvento = new Date("2025-05-25");
-    const hoje = new Date();
-    const diff = Math.ceil((dataEvento - hoje) / (1000 * 60 * 60 * 24));
-    document.getElementById("dias").textContent = diff;
-  </script>
-</body>
-</html>
+    const qr = new QRious({
+      element: document.getElementById("qr-code"),
+      value: "https://arretados-ingressos.vercel.app/validar?
